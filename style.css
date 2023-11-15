@@ -28,7 +28,7 @@
 /* div text */
 
 body {
-   /*background: black;*/
+   /*background: black;*/a
 }
 
 div#divText {
@@ -232,10 +232,6 @@ div.chainPopupLinkDiv a.selected {
 body > table > tr > td > div {
    height: 100vh;
    overflow-y: scroll;
-}
-
-#title {
-   display: none;
 }
 
 .custom-modal {
