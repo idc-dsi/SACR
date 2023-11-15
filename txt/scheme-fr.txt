@@ -1,0 +1,28 @@
+PROP:name=categorie
+$$$
+n nom propre
+t nom sans déterminant
+d nom défini
+i nom indéfini
+p nom possessif
+m nom démonstratif
+s pronom personnel
+f pronom réfléchi
+r pronom relatif
+o pronom démonstratif
+z pronom zéro
+e déterminant possessif
+
+PROP:name=fonction
+$$$
+s sujet
+v compl (verbe)
+n compl (nom)
+a compl (adjectif)
+c circonstant
+t autre
+h titre, parenthèse
+
+PROP:name=head,type=head
+
+PROP:name=expansion,type=text

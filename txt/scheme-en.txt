@@ -1,0 +1,20 @@
+PROP:name=partofspeech
+$$$
+a name
+d noun with definite article
+i noun with indefinite article
+n noun with determiner
+t noun without determiner
+s personnal pronoun
+r relative pronoun
+e possessive adjective
+
+PROP:name=function
+$$$
+s subject
+o object
+m noun modifier
+a adverbial
+t other
+
+PROP:name=head,type=head
