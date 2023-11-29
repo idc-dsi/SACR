@@ -69,10 +69,11 @@ def write_file(filename):
     except Exception as e:
         return {"error": str(e)}
 
+
 @app.route('/')
 def index():
-    anonymous = request.args.get('anonymous', '0')
-    print("Anonymous:", anonymous)  # This will print in your Flask server console
+    anonymous = request.args.get('anonymous', 0)  # This will be '1' if '?anonymous=1' is in the URL
+    # ... your code to handle anonymous or regular access ...
     return render_template('index.html', anonymous=anonymous)
 
 
@@ -82,7 +83,7 @@ def login():
 
 @app.route('/?anonymous=1')
 def anonymous():
-    return render_template('/?anonymous=1', anonymous=True)
+    return render_template('index.html/?anonymous=1', anonymous=True)
 
 @app.route('/login/authorized')
 def authorized():

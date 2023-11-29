@@ -46,7 +46,7 @@ The source code can be found at boberle.com.
 <script type="text/javascript">
 
    const VERSION = "5.4.0";
-   const OurVersion = "1.1.0"
+   const OurVersion = "1.0.0"
    const subTitle = "To begin add authentication to the URL";
    document.getElementById('title').innerHTML = "Coreference Chain Annotation Tool " +
    OurVersion + " (<a href=\static\"SACR- Annotator Guide .pdf\" target=\"_blank\">User Guide</a>)" + "<br>" + "<br>" + subTitle;
@@ -91,7 +91,7 @@ The source code can be found at boberle.com.
 <!-- FUNCTIONS TO BE EXECUTED AT LOADING TIME -->
 
 <script type="text/javascript">
-
+   
    // START HERE
    var isAnonymous = {{ anonymous|tojson }};
    var gDivLinkPropertyAnchor =
@@ -120,10 +120,11 @@ The source code can be found at boberle.com.
          }
          else
             gText.init();
-      } else {
-            // Logic for regular access
       }
-    }
+      else{
+         
+      }
+   }
    init();
  
 </script>
