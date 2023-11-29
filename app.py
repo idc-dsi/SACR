@@ -82,7 +82,7 @@ def login():
 
 @app.route('/?anonymous=1')
 def anonymous():
-    return render_template('index.html/?anonymous=1', anonymous=True)
+    return render_template('/?anonymous=1', anonymous=True)
 
 @app.route('/login/authorized')
 def authorized():
