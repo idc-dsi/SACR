@@ -62,7 +62,7 @@ class Text {
    }
 
    parse() {
-      while(this.div.firstChild)
+      while (this.div.firstChild)
          this.div.removeChild(this.div.firstChild);
 
       var parser = new SacrParser(this.div, this.raw_text,
@@ -78,7 +78,7 @@ class Text {
 
    init(dataLoader = null) {
       var that = this;
-      var callback = function(dataLoader) {
+      var callback = function (dataLoader) {
          that.textFilename = dataLoader.textFilename;
          that.raw_schema = dataLoader.schema;
          that.raw_text = dataLoader.text;
@@ -91,22 +91,22 @@ class Text {
             that.colorManager = new ColorManager(dataLoader.hueStep,
                dataLoader.saturationStep, dataLoader.lightnessStep);
             that.parse();
-         } catch(error) {
+         } catch (error) {
             var errText;
-            if (typeof(error) == "string") {
+            if (typeof (error) == "string") {
                errText = error;
             } else {
-               errText = "<p>"+error.name+": "+error.message+"</p>";
-               if (error.fileName) errText += "<p>File: "+error.fileName+"</p>";
-               if (error.lineNumber) errText += "<p>Line number: "+error.lineNumber+"</p>";
-               if (error.stack) errText += "<p>Stack: "+error.stack+"</p>";
-           }
+               errText = "<p>" + error.name + ": " + error.message + "</p>";
+               if (error.fileName) errText += "<p>File: " + error.fileName + "</p>";
+               if (error.lineNumber) errText += "<p>Line number: " + error.lineNumber + "</p>";
+               if (error.stack) errText += "<p>Stack: " + error.stack + "</p>";
+            }
             that.div.innerHTML = "<p>An error occured:</p>" + errText;
             return;
          }
          gLoadingTime = false;
       }
-      if(dataLoader) {
+      if (dataLoader) {
          this.dataLoader = dataLoader;
          callback(dataLoader);
       }
@@ -125,7 +125,7 @@ class Text {
       var anchor = document.createElement('A');
       anchor.appendChild(document.createTextNode(textContent));
       anchor.className = CLASS_TOKEN;
-      var func = function(obj, e, dblClick) {
+      var func = function (obj, e, dblClick) {
          // the next line will remove all selection of text made by the shift
          // key
          window.getSelection().removeAllRanges();
@@ -137,28 +137,28 @@ class Text {
          } else if (!dblClick && selected.length == 0) {
             that.chainColl.deselectAllLinks();
             obj.classList.add(CLASS_SELECTED);
-         // otherwise, we create a link
+            // otherwise, we create a link
          } else if (dblClick || selected.length == 1) {
             obj.classList.add(CLASS_SELECTED);
             // shift: ask for a name
             if (e.shiftKey && !e.ctrlKey && !e.metaKey) {
                that.createLinkAndChain(true);
-            // ctrl: attach to previous chain
+               // ctrl: attach to previous chain
             } else if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
                that.createLinkAndAttachItToLastSelectedChain();
-            // otherwise, default name
+               // otherwise, default name
             } else {
                that.createLinkAndChain(false);
             }
-         // if we are here, there is a problem somewhere
+            // if we are here, there is a problem somewhere
          } else {
             alert("Too many words are selected!");
             obj.deselectAllTokensAndLinks();
             return;
          }
       };
-      anchor.onclick = function(e){ func(this, e, false); };
-      anchor.ondblclick = function(e){ func(this, e, true); };
+      anchor.onclick = function (e) { func(this, e, false); };
+      anchor.ondblclick = function (e) { func(this, e, true); };
       return anchor;
    }
 
@@ -180,7 +180,7 @@ class Text {
       var anchors = document.getElementsByClassName(CLASS_TOKEN);
       var start = -1;
       var end = -1;
-      for (var i=0; i<anchors.length; i++) {
+      for (var i = 0; i < anchors.length; i++) {
          if (anchors[i].classList.contains(CLASS_SELECTED)) {
             if (start == -1) {
                start = i;
@@ -197,7 +197,7 @@ class Text {
       } else {
          if (includeAll) {
             var res = new Array();
-            for (var i=start; i<=end; i++) {
+            for (var i = start; i <= end; i++) {
                res.push(anchors[i]);
             }
             return res;
@@ -226,8 +226,8 @@ class Text {
          if (anchors[0].parentNode === anchors[1].parentNode) {
             return anchors;
          }
-         var one = anchors[0]; 
-         var two = anchors[1]; 
+         var one = anchors[0];
+         var two = anchors[1];
          // look for element that share a parent
          var e1 = one
          while (e1.tagName != "P") {
@@ -261,7 +261,7 @@ class Text {
    }
 
    createLinkAndChain(askForName) {
-      var tokenStrings = this.getSelectedTokens(true).map(function(e) { return e.textContent });
+      var tokenStrings = this.getSelectedTokens(true).map(function (e) { return e.textContent });
       var name = CommonFunctions.getChainName(this.chainColl, askForName,
          tokenStrings);
       if (!name) {
@@ -276,7 +276,7 @@ class Text {
       this.chainColl.addChain(chain);
       chain.addLink(link);
       link.select(); // once the link is added to the chain, so the chain
-         // is selected in the popup
+      // is selected in the popup
       gText.markChanged();
       return true;
    }
@@ -293,7 +293,7 @@ class Text {
       }
       lastSelectedChain.addLink(link);
       link.select(); // once the link is added to the chain, so the chain
-         // is selected in the popup
+      // is selected in the popup
       gText.markChanged();
       return true;
    }
@@ -308,7 +308,7 @@ class Text {
       var elementsUsedToCreateTheLink
          = this.getTheElementsToCreateALink(anchors);
       if (elementsUsedToCreateTheLink == null
-            || !elementsUsedToCreateTheLink.length) {
+         || !elementsUsedToCreateTheLink.length) {
          alert("I can't create a link!");
          this.deselectAllTokensAndLinks();
          return false;
@@ -351,7 +351,7 @@ class Text {
    };
    toggleFinished() {
       var finished = this.div.finished.childNodes[1];
-      if(finished.nodeValue.endsWith("=Yes"))
+      if (finished.nodeValue.endsWith("=Yes"))
          finished.nodeValue = finished.nodeValue.replace("=Yes", "=No");
       else
          finished.nodeValue = finished.nodeValue.replace("=No", "=Yes");
@@ -359,7 +359,7 @@ class Text {
    };
 
    undo() {
-      if(this.text_prev.length < 2)
+      if (this.text_prev.length < 2)
          return;
       this.text_prev.pop();
       this.raw_text = this.text_prev.pop();
@@ -381,7 +381,7 @@ class Text {
    }
 
    destroyAllLinks() {
-      for(var link of this.chainColl.getLinks())
+      for (var link of this.chainColl.getLinks())
          this.destroyLink(link);
       return true;
    }
@@ -402,7 +402,7 @@ class Text {
       if (chain.isTrueChain) {
          var chooser = new ColorChooserDialog(
             this.colorManager.getAvailableColors(this.chainColl.chains),
-            function(color) { chain.color = color; });
+            function (color) { chain.color = color; });
          this.markChanged();
       } else {
          alert("You can't change the color of this chain!");
@@ -535,11 +535,11 @@ class Text {
          alert("No schema has been defined!");
          return;
       }
-      var callback = function(name, searchedValue, reversed) {
-         gText.chainColl.applyToAllLinks(function(link) {
-            if ((typeof(searchedValue) == 'string' &&
-                     link.isEqualTo(name, searchedValue, reversed))
-                  || (typeof(searchedValue) == 'object' &&
+      var callback = function (name, searchedValue, reversed) {
+         gText.chainColl.applyToAllLinks(function (link) {
+            if ((typeof (searchedValue) == 'string' &&
+               link.isEqualTo(name, searchedValue, reversed))
+               || (typeof (searchedValue) == 'object' &&
                   link.matches(name, searchedValue, reversed))) {
                link.show();
             } else {
@@ -587,12 +587,12 @@ class Text {
       }
       var mean = trueLinkCount / trueChainCount;
       var msg = '';
-      msg += "Number of tokens: "+tokenCount+"\n";
-      msg += "Number of referents : "+chainCount+"\n";
-      msg += "Number of chains: "+trueChainCount+"\n";
-      msg += "Number of referring expressions: "+linkCount+"\n";
-      msg += "Number of links: "+trueLinkCount+"\n";
-      msg += "Average number of links per chain: "+mean+"\n";
+      msg += "Number of tokens: " + tokenCount + "\n";
+      msg += "Number of referents : " + chainCount + "\n";
+      msg += "Number of chains: " + trueChainCount + "\n";
+      msg += "Number of referring expressions: " + linkCount + "\n";
+      msg += "Number of links: " + trueLinkCount + "\n";
+      msg += "Average number of links per chain: " + mean + "\n";
       alert(msg);
    }
 
