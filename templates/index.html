@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 
-<!--             
+<!--                  
 
 SACR (Script d'Annotation de Chaînes de Référence): a coreference chain
 annotation tool.
@@ -21,7 +21,7 @@ If you have any question, contact me at boberle.com.
 
 The source code can be found at boberle.com.
 
-             -->
+                  -->
 
 <html lang="en">
   <head>
@@ -86,441 +86,453 @@ The source code can be found at boberle.com.
     <script type="text/javascript">
       // Function to fetch file content
       async function fetchFileContent(filename) {
-         try {
-             const response = await fetch('/read-file/' + encodeURIComponent(filename));
-             const data = await response.json();
-             return data.content;
-         } catch (error) {
-             console.error('Error fetching file content:', error);
-             return null;
-         }
-     }
-        
+        try {
+          const response = await fetch('/read-file/' + encodeURIComponent(filename))
+          const data = await response.json()
+          return data.content
+        } catch (error) {
+          console.error('Error fetching file content:', error)
+          return null
+        }
+      }
+      
       // Function to fetch file list
       async function fetchFileList() {
-         try {
-            const response = await fetch('/list-files');
-            const data = await response.json();
-            return data;
-         } catch (error) {
-            console.error('Error fetching file list:', error);
-            return null;
-         }
+        try {
+          const response = await fetch('/list-files')
+          const data = await response.json()
+          return data
+        } catch (error) {
+          console.error('Error fetching file list:', error)
+          return null
+        }
       }
-
+      
       function hideElements() {
-         document.getElementById('title').style.display = 'none'; // Hides the <h1> element
-         const buttonsDiv = document.querySelector('div'); // Assumes the first <div> contains the buttons
-         if (buttonsDiv) {
-             buttonsDiv.style.display = 'none'; // Hides the <div> with buttons
-         }
-         document.getElementById('divWhiteSpaceAtTheEnd').style.display = 'none';
-         document.getElementById('divLinkPropertyAnchor').style.display = 'none';
-         document.getElementById('fileListContainer').style.display = 'none';
-     }
-     
-     
-     // Function to save the current file
+        document.getElementById('title').style.display = 'none' // Hides the <h1> element
+        const buttonsDiv = document.querySelector('div') // Assumes the first <div> contains the buttons
+        if (buttonsDiv) {
+          buttonsDiv.style.display = 'none' // Hides the <div> with buttons
+        }
+        document.getElementById('divWhiteSpaceAtTheEnd').style.display = 'none'
+        document.getElementById('divLinkPropertyAnchor').style.display = 'none'
+        document.getElementById('fileListContainer').style.display = 'none'
+      }
+      
+      // Function to save the current file
       function saveCurrentFile(filePath, content) {
-         fetch('/save-file/' + encodeURIComponent(filePath), {
-            method: 'POST',
-            headers: {'Content-Type': 'text/plain'},
-            body: content
-         })
-         .then(function(response) {
-            if (!response.ok) {
-               window.alert('Error saving: ' + response.statusText);
-            } else {
-               window.alert('Saved successfully!');
-            }
-         });
+        fetch('/save-file/' + encodeURIComponent(filePath), {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: content
+        }).then(function (response) {
+          if (!response.ok) {
+            window.alert('Error saving: ' + response.statusText)
+          } else {
+            window.alert('Saved successfully!')
+          }
+        })
       }
-   
+      
       function createFileLink(filePath) {
-         const li = document.createElement('li'); // Create list item
-         const link = document.createElement('a');
-         link.href = '#';
-         link.classList.add('file-link');
-     
-         // Extract the specific part of the file name
-         const parts = filePath.split('/');
-         const filenameWithExtension = parts[parts.length - 1]; // Get the last part of the path
-         const filename = filenameWithExtension.split('.')[0]; // Remove file extension
-     
-         link.textContent = filename;
-         link.setAttribute('data-filename', filePath);
-         link.addEventListener('click', async (event) => {
-            event.preventDefault();
-            const filename = event.target.getAttribute('data-filename');
-            const fileContent = await fetchFileContent(filename);
-            //window.alert(fileContent)
-            if (fileContent) {
-               // Directly pass the file content to DataLoader
-               //dataloader = new DataLoader(callback,null,fileContent);
-               //gText.clickOnTheParseButton();
-               currentFilePath = filePath;
-               gText.init(await DataLoader.fromFileContent(fileContent,filename));
-               hideElements();
-
-            }
-         });
-         li.appendChild(link); // Append link to list item
-         return li;
+        const li = document.createElement('li') // Create list item
+        const link = document.createElement('a')
+        link.href = '#'
+        link.classList.add('file-link')
+      
+        // Extract the specific part of the file name
+        const parts = filePath.split('/')
+        const filenameWithExtension = parts[parts.length - 1] // Get the last part of the path
+        const filename = filenameWithExtension.split('.')[0] // Remove file extension
+      
+        link.textContent = filename
+        link.setAttribute('data-filename', filePath)
+        link.addEventListener('click', async (event) => {
+          event.preventDefault()
+          const filename = event.target.getAttribute('data-filename')
+          const fileContent = await fetchFileContent(filename)
+          //window.alert(fileContent)
+          if (fileContent) {
+            // Directly pass the file content to DataLoader
+            //dataloader = new DataLoader(callback,null,fileContent);
+            //gText.clickOnTheParseButton();
+            currentFilePath = filePath
+            gText.init(await DataLoader.fromFileContent(fileContent, filename))
+            hideElements()
+          }
+        })
+        li.appendChild(link) // Append link to list item
+        return li
       }
-   
+      
       async function populateFileList() {
-         const fileListContainer = document.getElementById('fileListContainer');
-         const files = await fetchFileList();
-         if (files && files.length) {
-            files.forEach(file => {
-               const listItem = createFileLink(file);
-               fileListContainer.appendChild(listItem); // Append list item to list
-            });
-         }
+        const fileListContainer = document.getElementById('fileListContainer')
+        const files = await fetchFileList()
+        if (files && files.length) {
+          files.forEach((file) => {
+            const listItem = createFileLink(file)
+            fileListContainer.appendChild(listItem) // Append list item to list
+          })
+        }
       }
-
-   // START HERE
-   
-   var gDivLinkPropertyAnchor =
-      document.getElementById('divLinkPropertyAnchor');
-
-   var gLoadingTime = true;
-   var file_content = "{{ file_content | safe }}"; // Set by Flask
-   var urlParams = new URLSearchParams(location.search);
-   var isAnonymous = {{ anonymous | tojson }};
-   if (urlParams.has("withAnnotations")) {
-      gText = new Text("withAnnotations");
-      gText.clickOnTheParseButton();
-   } else if (urlParams.has("withoutAnnotations")) {
-      gText = new Text("withoutAnnotations");
-      gText.clickOnTheParseButton();
-   } else {
-      gText = new Text();
-   }
-
-   
-   async function init() {
-      var urlParams = new URLSearchParams(window.location.search);
-      var logged_in = urlParams.get('logged_in') === 'True';
-      if (isAnonymous) {
-         if (window.user) {
-            ul = document.createElement("ol");
+      
+      // START HERE
+      
+      var gDivLinkPropertyAnchor = document.getElementById('divLinkPropertyAnchor')
+      
+      var gLoadingTime = true
+      var file_content = '{{ file_content | safe }}' // Set by Flask
+      var urlParams = new URLSearchParams(location.search)
+      //var isAnonymous = {{ anonymous | tojson}};
+      if (urlParams.has('withAnnotations')) {
+        gText = new Text('withAnnotations')
+        gText.clickOnTheParseButton()
+      } else if (urlParams.has('withoutAnnotations')) {
+        gText = new Text('withoutAnnotations')
+        gText.clickOnTheParseButton()
+      } else {
+        gText = new Text()
+      }
+      
+      async function init() {
+        var urlParams = new URLSearchParams(window.location.search)
+        var logged_in = urlParams.get('logged_in') === 'True'
+        var isAnonymous = urlParams.get('anonymous') === '1'
+        if (isAnonymous) {
+          if (window.user) {
+            ul = document.createElement('ol')
             fetchdocs().then((docs) => {
-               Array.prototype.forEach.call(docs, (doc) => {
-                  li = document.createElement("li");
-                  a = document.createElement("a");
-                  a.href = "?textUrl=static/api/doc/" + window.user.name + "/" + doc + "&schemaUrl=txt/scheme-iahlt.txt&tokenizationType=4";
-                  a.innerText = doc;
-                  li.appendChild(a);
-                  ul.appendChild(li);
-               });
-               document.body.appendChild(ul);
-            });
-         }
-         else
-            gText.init();
+              Array.prototype.forEach.call(docs, (doc) => {
+                li = document.createElement('li')
+                a = document.createElement('a')
+                a.href = '?textUrl=static/api/doc/' + window.user.name + '/' + doc + '&schemaUrl=txt/scheme-iahlt.txt&tokenizationType=4'
+                a.innerText = doc
+                li.appendChild(a)
+                ul.appendChild(li)
+              })
+              document.body.appendChild(ul)
+            })
+          } else gText.init()
+        } else if (logged_in) {
+          await populateFileList()
+        }
       }
-      else if (logged_in) {
-         await populateFileList();
-      }
-   }
-   init();
-   
-
-</script>
+      init()
+    </script>
 
     <script>
-// Function to create and show a modal with HTML content
-let isModalOpen = false;
-function showModal(htmlContent) {
-   // Create the modal elements
-   let modal = document.createElement('div');
-   let modalContent = document.createElement('div');
-   let closeButton = document.createElement('button');
- 
-   // Add classes and content
-   modal.className = 'custom-modal';
-   modalContent.className = 'custom-modal-content';
-   closeButton.className = 'custom-modal-close';
-   closeButton.innerHTML = '&times;'; // Using HTML entity for times symbol
- 
-   // Set HTML content
-   modalContent.innerHTML = htmlContent;
-   modalContent.insertBefore(closeButton, modalContent.firstChild);
- 
-   // Append elements
-   modal.appendChild(modalContent);
-   document.body.appendChild(modal);
- 
-   // Add event listener for close button
-   closeButton.onclick = function() {
-     modal.style.display = 'none';
-     isModalOpen = false;
-   };
- 
-   // Show the modal
-   modal.style.display = 'block';
- }
-</script>
+      // Function to create and show a modal with HTML content
+      let isModalOpen = false
+      function showModal(htmlContent) {
+        // Create the modal elements
+        let modal = document.createElement('div')
+        let modalContent = document.createElement('div')
+        let closeButton = document.createElement('button')
+      
+        // Add classes and content
+        modal.className = 'custom-modal'
+        modalContent.className = 'custom-modal-content'
+        closeButton.className = 'custom-modal-close'
+        closeButton.innerHTML = '&times;' // Using HTML entity for times symbol
+      
+        // Set HTML content
+        modalContent.innerHTML = htmlContent
+        modalContent.insertBefore(closeButton, modalContent.firstChild)
+      
+        // Append elements
+        modal.appendChild(modalContent)
+        document.body.appendChild(modal)
+      
+        // Add event listener for close button
+        closeButton.onclick = function () {
+          modal.style.display = 'none'
+          isModalOpen = false
+        }
+      
+        // Show the modal
+        modal.style.display = 'block'
+      }
+    </script>
 
     <script>
-   var gKeyDownHandler = function (e) {
-
-      var tagName = document.activeElement.tagName;
-
-      //console.log(tagName);
-      //console.log(e.keyCode);
-
-      if (tagName != 'BODY') {
-         return;
-      }
-
-      if (e.keyCode == 46 || e.keyCode == 8) { // suppr
-         if(e.shiftKey)
-            gText.destroyAllLinks();
-         else
-            gText.destroySelectedLink();
-      } else if (e.keyCode == 67) { // c
-         gText.changeColorOfSelectedChain();
-      } else if (e.keyCode == 66) { // b = backward in text
-         if (e.ctrlKey || e.metaKey) {
-            return;
-         }
-         if (e.shiftKey) {
-            gText.selectNextLinkInText(true, true);
-         } else {
-            gText.selectNextLinkInText(true, false);
-         }
-      } else if (e.keyCode == 70) { // f = forward in text
-         if (e.ctrlKey || e.metaKey) {
-            return;
-         }
-         if (e.shiftKey) {
-            gText.selectNextLinkInText(false, true);
-         } else {
-            gText.selectNextLinkInText(false, false);
-         }
-      } else if (e.keyCode == 74) { // j = forward in chain
-         if (e.ctrlKey || e.metaKey) {
-            return;
-         }
-         if (e.shiftKey) {
-            gText.selectNextLinkInChain(false, true);
-         } else {
-            gText.selectNextLinkInChain(false, false);
-         }
-      } else if (e.keyCode == 75) { // k = backward in chain
-         if (e.ctrlKey || e.metaKey) {
-            return;
-         }
-         if (e.shiftKey) {
-            gText.selectNextLinkInChain(true, true);
-         } else {
-            gText.selectNextLinkInChain(true, false);
-         }
-      } else if (e.keyCode == 78) { // n = change name
-         // don't use ctrl+shift (open new window)
-         if (e.shiftKey) { // don't ask
-            gText.changeNameOfSelectedChain(false);
-         } else { // ask the user (default = current name)
-            gText.changeNameOfSelectedChain(true, true);
-         }
-      } else if (e.keyCode == 77) { // m = change name
-            // ask the user (default = words)
-            gText.changeNameOfSelectedChain(true, false);
-      } else if (e.keyCode == 79) { // o = only this chain
-         if (e.shiftKey) { // show all
-            gText.showAllChains();
-         } else { // show only the selected chain
-            gText.showOnlySelectedChain();
-         }
-      } else if (e.keyCode == 84) { // t = scroll to
-         if (e.shiftKey) { // in the popup
-            gText.scrollToSelectedLink(true);
-         } else {
-            gText.scrollToSelectedLink();
-         }
-      } else if (e.keyCode == 80) { // p = chain popup
-         if (e.shiftKey) {
-            gText.chainColl.showChainPatters(true);
-         } else {
-            gText.chainPopup.toggle();
-         }
-      } else if (e.keyCode == 81) { // q
-         //gText.clickOnTheParseButton();
-      } else if (e.keyCode === 90 && !e.ctrlKey) { // z = insert zero token Ø
-         gText.insertZeroToken(e.shiftKey);
-      } else if (e.keyCode === 90 && e.ctrlKey) { // ctrl+z = undo
-         gText.undo();
-      } else if (e.keyCode == 69) { // e = expand/collapse all
-         if (e.shiftKey) {
-            gText.chainColl.collapseAllChainsInPopup();
-         } else {
-            gText.chainColl.expandAllChainsInPopup();
-         }
-      } else if (e.keyCode == 87) { // w = export
-         if (currentFilePath && gText) {
-            saveCurrentFile(currentFilePath, new Exporter().computeText(true));
-         } else {
-            new Exporter().exportText();
-         }
-      } else if (e.keyCode == 65) { // a = export html
-         if (e.shiftKey) {
-            new Exporter().exportHTML(true);
-         } else {
-            new Exporter().exportHTML();
-         }
-      } else if (e.keyCode == 88) { // x = export schema
-         if (e.shiftKey) {
-            new Exporter().showSchema();
-         } else {
-            new Exporter().exportSchema();
-         }
-      } else if (e.keyCode == 83 && !e.shiftKey) { // s = search
-         gText.search();
-      } else if (e.keyCode == 85) { // u = hide non true chains
-         if (e.shiftKey) {
-            gText.chainColl.toggleNonTrueChainsDisplayInPopup(); // in popup
-         } else {
-            gText.hideNonTrueChains(); // in main window
-         }
-      } else if (e.keyCode == 86) { // v = expand only true chains in popup
-         if (e.shiftKey) {
+      var gKeyDownHandler = function (e) {
+        var tagName = document.activeElement.tagName
+      
+        //console.log(tagName);
+        //console.log(e.keyCode);
+      
+        if (tagName != 'BODY') {
+          return
+        }
+      
+        if (e.keyCode == 46 || e.keyCode == 8) {
+          // suppr
+          if (e.shiftKey) gText.destroyAllLinks()
+          else gText.destroySelectedLink()
+        } else if (e.keyCode == 67) {
+          // c
+          gText.changeColorOfSelectedChain()
+        } else if (e.keyCode == 66) {
+          // b = backward in text
+          if (e.ctrlKey || e.metaKey) {
+            return
+          }
+          if (e.shiftKey) {
+            gText.selectNextLinkInText(true, true)
+          } else {
+            gText.selectNextLinkInText(true, false)
+          }
+        } else if (e.keyCode == 70) {
+          // f = forward in text
+          if (e.ctrlKey || e.metaKey) {
+            return
+          }
+          if (e.shiftKey) {
+            gText.selectNextLinkInText(false, true)
+          } else {
+            gText.selectNextLinkInText(false, false)
+          }
+        } else if (e.keyCode == 74) {
+          // j = forward in chain
+          if (e.ctrlKey || e.metaKey) {
+            return
+          }
+          if (e.shiftKey) {
+            gText.selectNextLinkInChain(false, true)
+          } else {
+            gText.selectNextLinkInChain(false, false)
+          }
+        } else if (e.keyCode == 75) {
+          // k = backward in chain
+          if (e.ctrlKey || e.metaKey) {
+            return
+          }
+          if (e.shiftKey) {
+            gText.selectNextLinkInChain(true, true)
+          } else {
+            gText.selectNextLinkInChain(true, false)
+          }
+        } else if (e.keyCode == 78) {
+          // n = change name
+          // don't use ctrl+shift (open new window)
+          if (e.shiftKey) {
+            // don't ask
+            gText.changeNameOfSelectedChain(false)
+          } else {
+            // ask the user (default = current name)
+            gText.changeNameOfSelectedChain(true, true)
+          }
+        } else if (e.keyCode == 77) {
+          // m = change name
+          // ask the user (default = words)
+          gText.changeNameOfSelectedChain(true, false)
+        } else if (e.keyCode == 79) {
+          // o = only this chain
+          if (e.shiftKey) {
+            // show all
+            gText.showAllChains()
+          } else {
+            // show only the selected chain
+            gText.showOnlySelectedChain()
+          }
+        } else if (e.keyCode == 84) {
+          // t = scroll to
+          if (e.shiftKey) {
+            // in the popup
+            gText.scrollToSelectedLink(true)
+          } else {
+            gText.scrollToSelectedLink()
+          }
+        } else if (e.keyCode == 80) {
+          // p = chain popup
+          if (e.shiftKey) {
+            gText.chainColl.showChainPatters(true)
+          } else {
+            gText.chainPopup.toggle()
+          }
+        } else if (e.keyCode == 81) {
+          // q
+          //gText.clickOnTheParseButton();
+        } else if (e.keyCode === 90 && !e.ctrlKey) {
+          // z = insert zero token Ø
+          gText.insertZeroToken(e.shiftKey)
+        } else if (e.keyCode === 90 && e.ctrlKey) {
+          // ctrl+z = undo
+          gText.undo()
+        } else if (e.keyCode == 69) {
+          // e = expand/collapse all
+          if (e.shiftKey) {
+            gText.chainColl.collapseAllChainsInPopup()
+          } else {
+            gText.chainColl.expandAllChainsInPopup()
+          }
+        } else if (e.keyCode == 87) {
+          // w = export
+          if (currentFilePath && gText) {
+            saveCurrentFile(currentFilePath, new Exporter().computeText(true))
+          } else {
+            new Exporter().exportText()
+          }
+        } else if (e.keyCode == 65) {
+          // a = export html
+          if (e.shiftKey) {
+            new Exporter().exportHTML(true)
+          } else {
+            new Exporter().exportHTML()
+          }
+        } else if (e.keyCode == 88) {
+          // x = export schema
+          if (e.shiftKey) {
+            new Exporter().showSchema()
+          } else {
+            new Exporter().exportSchema()
+          }
+        } else if (e.keyCode == 83 && !e.shiftKey) {
+          // s = search
+          gText.search()
+        } else if (e.keyCode == 85) {
+          // u = hide non true chains
+          if (e.shiftKey) {
+            gText.chainColl.toggleNonTrueChainsDisplayInPopup() // in popup
+          } else {
+            gText.hideNonTrueChains() // in main window
+          }
+        } else if (e.keyCode == 86) {
+          // v = expand only true chains in popup
+          if (e.shiftKey) {
             // free
-         } else {
-            gText.chainColl.expandTrueChainsInPopup();
-         }
-      } else if (e.keyCode == 73) { // i = increase font
-         if (e.shiftKey) {
-            gText.changeFontSize(false);
-         } else {
-            gText.changeFontSize(true);
-         }
-      } else if (e.keyCode == 76) { // l = statistics
-         if (e.ctrlKey || e.metaKey) {
-            return;
-         }
-         if (e.shiftKey) {
+          } else {
+            gText.chainColl.expandTrueChainsInPopup()
+          }
+        } else if (e.keyCode == 73) {
+          // i = increase font
+          if (e.shiftKey) {
+            gText.changeFontSize(false)
+          } else {
+            gText.changeFontSize(true)
+          }
+        } else if (e.keyCode == 76) {
+          // l = statistics
+          if (e.ctrlKey || e.metaKey) {
+            return
+          }
+          if (e.shiftKey) {
             // free
-         } else {
-            gText.showStatistics();
-         }
-      } else if (e.keyCode == 83 && e.shiftKey) { // S = save
-         res = fetch("static/api/doc/" + window.user.name + "/" + gText.textFilename.replace(".txt", ""), {
-            "method": "POST",
-            "headers": {"Content-Type": "text/plain"},
-            "body": new Exporter().computeText(true)
-         }).then(function(res) {
-            if (!res.ok)
-               window.alert("Error saving: " + res.statusText);
-            else if(urlParams.get("textUrl") && urlParams.get("textUrl") != "static/api/doc/" + window.user.name + "/" + gText.textFilename.replace(".txt", "")) {
-               urlParams.set("textUrl", "static/api/doc/" + window.user.name + "/" + gText.textFilename.replace(".txt", ""));
-               window.location.search = urlParams.toString();
-            }
-            else
-               gText.markChanged(false);
-         });
-      } else if (e.keyCode == 72) { // h = help
-         if  (!isModalOpen){
-            isModalOpen = true;
+          } else {
+            gText.showStatistics()
+          }
+        } else if (e.keyCode == 83 && e.shiftKey) {
+          // S = save
+          res = fetch('static/api/doc/' + window.user.name + '/' + gText.textFilename.replace('.txt', ''), {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: new Exporter().computeText(true)
+          }).then(function (res) {
+            if (!res.ok) window.alert('Error saving: ' + res.statusText)
+            else if (urlParams.get('textUrl') && urlParams.get('textUrl') != 'static/api/doc/' + window.user.name + '/' + gText.textFilename.replace('.txt', '')) {
+              urlParams.set('textUrl', 'static/api/doc/' + window.user.name + '/' + gText.textFilename.replace('.txt', ''))
+              window.location.search = urlParams.toString()
+            } else gText.markChanged(false)
+          })
+        } else if (e.keyCode == 72) {
+          // h = help
+          if (!isModalOpen) {
+            isModalOpen = true
             showModal(`
-            <h1>Help</h1>
-            <p>This is a help window with useful information.</p>
-            <ul>
-               <li>To create a link with one token: double-click on that token.</li>
-               <li>To create a link with more than one token: click on the first and last token.</li>
-               <li>By default, a default name will be used.</li>
-               <li>Hold Shift to be asked for a name.</li>
-               <li>Hold Ctrl to automatically attach the link to the last selected chain.</li>
-            </ul>
-
-            <p>Create chain with drag and drop:</p>
-            <ul>
-            <li>Source is singleton, target is singleton: target will be attached to source chain.</li>
-            <li>Source is singleton and target is not singleton: source will be attached to target chain. Hold Ctrl for the reverse.</li>
-            <li>Source is not singleton and target is singleton: target will be attached to source chain.</li>
-            <li>Source is not singleton and target is not singleton: the chains will be merged (you will be asked to confirm). Hold Ctrl to detach the target from its chain and attach it to the source chain.</li>
-            </ul>
-            <p>Note that drag & drop is valid in the main window and in the popup, but also between them.</p>
-
-            <p>Replace a link:</p>
-            <ul>
-            <li>To replace a link, create a new link, then drag-and-drop, holding Shift (Ctrl+Shift for Firefox 54 and below), it to the link to be replaced. This will copy all the metadata (chain name and properties) to the target link, and remove the source link.</li>
-            </ul>
-
-            <p>Detach a link from each chain:</p>
-            <ul>
-            <li>Hold Shift and click on a link to attach it to a new chain.</li>
-            <li>Hold Ctrl and click on a link to attach it to the last selected chain.</li>
-            <li>Hold Ctrl and Shift and click on a link to attach it to a new chain (and be asked for the name of that chain).</li>
-            </ul>
-
-            <p>Edit links:</p>
-            <ul>
-            <li>Suppr: destroy the selected link.</li>
-            <li>Shift+Suppr: destroy all links.</li>
-            <li>C: change color of the selected chain.</li>
-            <li>N: change the name of the selected chain (ask, default set to current name).</li>
-            <li>M: change the name of the selected chain (ask, default set to content).</li>
-            <li>^Z: undo.</li>
-            </ul>
-
-            <p>Navigate:</p>
-            <ul>
-            <li>F: forward in text.</li>
-            <li>J: forward in chain.</li>
-            <li>B: backward in text.</li>
-            <li>K: backward in chain.</li>
-            <li>T: scroll to the selected link in the main window.</li>
-            </ul>
-
-            <p>Show and hide links:</p>
-            <ul>
-            <li>O: show only the selected chain.</li>
-            <li>S: show the search box.</li>
-            <li>U: hide non-true chains. Press again to toggle visibility.</li>
-            </ul>
-
-            <p>All chains and links popup:</p>
-            <ul>
-            <li>P: show the popup window of all chains and links.</li>
-            <li>E: expand all chains in the popup.</li>
-            <li>V: expand true chains in the popup.</li>
-            </ul>
-
-            <p>Save the text, the annotation, and the schema:</p>
-            <ul>
-            <li>W: write the text and annotations to a file.</li>
-            <li>A: write an HTML representation to a file.</li>
-            <li>X: write the schema to a file or show the schema in a dialog.</li>
-            <li>S: write the text and annotation to the server.</li>
-            </ul>
-
-            <p>Insert zero token (Ø):</p>
-            <ul>
-            <li>Z: insert Ø before/after the currently selected token.</li>
-            </ul>
-
-            <p>Display:</p>
-            <ul>
-            <li>I: increase/decrease font size.</li>
-            <li>L: display statistics.</li>
-            <li>P: show chain patterns.</li>
-            </ul>
-            `);
-         }
-                          
+                              <h1>Help</h1>
+                              <p>This is a help window with useful information.</p>
+                              <ul>
+                                 <li>To create a link with one token: double-click on that token.</li>
+                                 <li>To create a link with more than one token: click on the first and last token.</li>
+                                 <li>By default, a default name will be used.</li>
+                                 <li>Hold Shift to be asked for a name.</li>
+                                 <li>Hold Ctrl to automatically attach the link to the last selected chain.</li>
+                              </ul>
+                  
+                              <p>Create chain with drag and drop:</p>
+                              <ul>
+                              <li>Source is singleton, target is singleton: target will be attached to source chain.</li>
+                              <li>Source is singleton and target is not singleton: source will be attached to target chain. Hold Ctrl for the reverse.</li>
+                              <li>Source is not singleton and target is singleton: target will be attached to source chain.</li>
+                              <li>Source is not singleton and target is not singleton: the chains will be merged (you will be asked to confirm). Hold Ctrl to detach the target from its chain and attach it to the source chain.</li>
+                              </ul>
+                              <p>Note that drag & drop is valid in the main window and in the popup, but also between them.</p>
+                  
+                              <p>Replace a link:</p>
+                              <ul>
+                              <li>To replace a link, create a new link, then drag-and-drop, holding Shift (Ctrl+Shift for Firefox 54 and below), it to the link to be replaced. This will copy all the metadata (chain name and properties) to the target link, and remove the source link.</li>
+                              </ul>
+                  
+                              <p>Detach a link from each chain:</p>
+                              <ul>
+                              <li>Hold Shift and click on a link to attach it to a new chain.</li>
+                              <li>Hold Ctrl and click on a link to attach it to the last selected chain.</li>
+                              <li>Hold Ctrl and Shift and click on a link to attach it to a new chain (and be asked for the name of that chain).</li>
+                              </ul>
+                  
+                              <p>Edit links:</p>
+                              <ul>
+                              <li>Suppr: destroy the selected link.</li>
+                              <li>Shift+Suppr: destroy all links.</li>
+                              <li>C: change color of the selected chain.</li>
+                              <li>N: change the name of the selected chain (ask, default set to current name).</li>
+                              <li>M: change the name of the selected chain (ask, default set to content).</li>
+                              <li>^Z: undo.</li>
+                              </ul>
+                  
+                              <p>Navigate:</p>
+                              <ul>
+                              <li>F: forward in text.</li>
+                              <li>J: forward in chain.</li>
+                              <li>B: backward in text.</li>
+                              <li>K: backward in chain.</li>
+                              <li>T: scroll to the selected link in the main window.</li>
+                              </ul>
+                  
+                              <p>Show and hide links:</p>
+                              <ul>
+                              <li>O: show only the selected chain.</li>
+                              <li>S: show the search box.</li>
+                              <li>U: hide non-true chains. Press again to toggle visibility.</li>
+                              </ul>
+                  
+                              <p>All chains and links popup:</p>
+                              <ul>
+                              <li>P: show the popup window of all chains and links.</li>
+                              <li>E: expand all chains in the popup.</li>
+                              <li>V: expand true chains in the popup.</li>
+                              </ul>
+                  
+                              <p>Save the text, the annotation, and the schema:</p>
+                              <ul>
+                              <li>W: write the text and annotations to a file.</li>
+                              <li>A: write an HTML representation to a file.</li>
+                              <li>X: write the schema to a file or show the schema in a dialog.</li>
+                              <li>S: write the text and annotation to the server.</li>
+                              </ul>
+                  
+                              <p>Insert zero token (Ø):</p>
+                              <ul>
+                              <li>Z: insert Ø before/after the currently selected token.</li>
+                              </ul>
+                  
+                              <p>Display:</p>
+                              <ul>
+                              <li>I: increase/decrease font size.</li>
+                              <li>L: display statistics.</li>
+                              <li>P: show chain patterns.</li>
+                              </ul>
+                              `)
+          }
+        }
       }
-   };
-
-   if(gText) {
-      document.body.addEventListener('keydown', gKeyDownHandler);
-      window.onbeforeunload = function(e) {
-         if(gText && gText.div && gText.div.getElementsByClassName("comment").length > 0 && gText.div.getElementsByClassName("comment saved").length == 0)
-           return "Make sure you have exported your annotations!  All your modification in the browser will otherwise be lost!";
+      
+      if (gText) {
+        document.body.addEventListener('keydown', gKeyDownHandler)
+        window.onbeforeunload = function (e) {
+          if (gText && gText.div && gText.div.getElementsByClassName('comment').length > 0 && gText.div.getElementsByClassName('comment saved').length == 0) return 'Make sure you have exported your annotations!  All your modification in the browser will otherwise be lost!'
+        }
       }
-   }
-
-</script>
+    </script>
   </body>
 </html>
