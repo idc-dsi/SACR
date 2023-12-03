@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 
-<!--
+<!--             
 
 SACR (Script d'Annotation de Chaînes de Référence): a coreference chain
 annotation tool.
@@ -21,88 +21,187 @@ If you have any question, contact me at boberle.com.
 
 The source code can be found at boberle.com.
 
--->
+             -->
 
 <html lang="en">
-<head>
-   <meta charset="UTF-8">
-   <title>SACR Coreference</title>
-   <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>SACR Coreference</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <h1 id="title">SACR</h1>
+    <div>
+      <button onclick="location.href='/login'">Login with Azure</button>
+      <button onclick="location.href='/?anonymous=1'">Access Anonymously</button>
+    </div>
+    <div id="divWhiteSpaceAtTheEnd"></div>
+    <div id="divLinkPropertyAnchor"></div>
+    <div id="fileListContainer"></div>
 
-<h1 id="title">SACR</h1>
-<div>
-    <button onclick="location.href='/login'">Login with Azure</button>
-    <button onclick="location.href='/?anonymous=1'">Access Anonymously</button>
-</div>
-<div id="divWhiteSpaceAtTheEnd"></div>
+    <!-- CONSTANTS AND GLOBAL VARIABLES -->
 
-<div id="divLinkPropertyAnchor"></div>
+    <script type="text/javascript">
+      const VERSION = '5.4.0'
+      const OurVersion = '1.1.0'
+      const subTitle = 'To begin add authentication to the URL'
+      document.getElementById('title').innerHTML = 'Coreference Chain Annotation Tool ' + OurVersion + ' (<a href="static/SACR- Annotator Guide .pdf" target="_blank">User Guide</a>)'
+      var anonymous = '{{ anonymous }}' // Set by Flask
+      
+      const CLASS_PARAGRAPH = 'paragraph'
+      const CLASS_TOKEN = 'token'
+      const CLASS_COMMENT = 'comment'
+      const CLASS_SAVED = 'comment saved'
+      const CLASS_HEADING = 'heading'
+      const CLASS_LINK = 'link'
+      const CLASS_METADATA = 'metadata'
+      const CLASS_PAR_NUMBER = 'parNumber'
+      const CLASS_SELECTED = 'selected'
+      const CLASS_HIDDEN = 'hidden'
+      const CHAIN_POPUP_MAIN_DIV_ID = 'divChainPopup'
+      const CLASS_CHAIN_POPUP_LINK_NAME = 'chainPopupLinkName'
+      const CLASS_CHAIN_POPUP_CHAIN_NAME = 'chainPopupChainName'
+      const CLASS_CHAIN_POPUP_CHAIN_DIV = 'chainPopupChainDiv'
+      const CLASS_CHAIN_POPUP_LINK_DIV = 'chainPopupLinkDiv'
+    </script>
 
+    <!-- OBJECTS PROTOTYPES -->
+    <script type="text/javascript" src="static/js/backend.js"></script>
+    <script type="text/javascript" src="static/js/cls_common.js"></script>
+    <script type="text/javascript" src="static/js/cls_sacr_parser.js"></script>
+    <script type="text/javascript" src="static/js/cls_property.js"></script>
+    <script type="text/javascript" src="static/js/cls_modal_div.js"></script>
+    <script type="text/javascript" src="static/js/samples.js"></script>
+    <script type="text/javascript" src="static/js/cls_data_loader.js"></script>
+    <script type="text/javascript" src="static/js/cls_text.js"></script>
+    <script type="text/javascript" src="static/js/cls_link.js"></script>
+    <script type="text/javascript" src="static/js/cls_chain.js"></script>
+    <script type="text/javascript" src="static/js/cls_colors.js"></script>
+    <script type="text/javascript" src="static/js/cls_scrolling.js"></script>
+    <script type="text/javascript" src="static/js/cls_chain_popup.js"></script>
+    <script type="text/javascript" src="static/js/cls_exporter.js"></script>
 
-<!-- CONSTANTS AND GLOBAL VARIABLES-->
+    <!-- FUNCTIONS TO BE EXECUTED AT LOADING TIME -->
 
-<script type="text/javascript">
+    <script type="text/javascript">
+      // Function to fetch file content
+      async function fetchFileContent(filename) {
+         try {
+             const response = await fetch('/read-file/' + encodeURIComponent(filename));
+             const data = await response.json();
+             return data.content;
+         } catch (error) {
+             console.error('Error fetching file content:', error);
+             return null;
+         }
+     }
+        
+      // Function to fetch file list
+      async function fetchFileList() {
+         try {
+            const response = await fetch('/list-files');
+            const data = await response.json();
+            return data;
+         } catch (error) {
+            console.error('Error fetching file list:', error);
+            return null;
+         }
+      }
 
-   const VERSION = "5.4.0";
-   const OurVersion = "1.0.0"
-   const subTitle = "To begin add authentication to the URL";
-   document.getElementById('title').innerHTML = "Coreference Chain Annotation Tool " +
-   OurVersion + " (<a href=\static\"SACR- Annotator Guide .pdf\" target=\"_blank\">User Guide</a>)" + "<br>" + "<br>" + subTitle;
-   var anonymous = "{{ anonymous }}";  // Set by Flask
-  
-   const CLASS_PARAGRAPH = 'paragraph';
-   const CLASS_TOKEN = 'token';
-   const CLASS_COMMENT = 'comment';
-   const CLASS_SAVED = 'comment saved';
-   const CLASS_HEADING = 'heading';
-   const CLASS_LINK = 'link';
-   const CLASS_METADATA = 'metadata';
-   const CLASS_PAR_NUMBER = 'parNumber';
-   const CLASS_SELECTED = 'selected';
-   const CLASS_HIDDEN = 'hidden';
-   const CHAIN_POPUP_MAIN_DIV_ID = 'divChainPopup';
-   const CLASS_CHAIN_POPUP_LINK_NAME = 'chainPopupLinkName';
-   const CLASS_CHAIN_POPUP_CHAIN_NAME = 'chainPopupChainName';
-   const CLASS_CHAIN_POPUP_CHAIN_DIV = 'chainPopupChainDiv';
-   const CLASS_CHAIN_POPUP_LINK_DIV = 'chainPopupLinkDiv';
-
-</script>
-
-
-
-<!-- OBJECTS PROTOTYPES -->
-<script type="text/javascript" src="static/js/backend.js"></script>
-<script type="text/javascript" src="static/js/cls_common.js"></script>
-<script type="text/javascript" src="static/js/cls_sacr_parser.js"></script>
-<script type="text/javascript" src="static/js/cls_property.js"></script>
-<script type="text/javascript" src="static/js/cls_modal_div.js"></script>
-<script type="text/javascript" src="static/js/samples.js"></script>
-<script type="text/javascript" src="static/js/cls_data_loader.js"></script>
-<script type="text/javascript" src="static/js/cls_text.js"></script>
-<script type="text/javascript" src="static/js/cls_link.js"></script>
-<script type="text/javascript" src="static/js/cls_chain.js"></script>
-<script type="text/javascript" src="static/js/cls_colors.js"></script>
-<script type="text/javascript" src="static/js/cls_scrolling.js"></script>
-<script type="text/javascript" src="static/js/cls_chain_popup.js"></script>
-<script type="text/javascript" src="static/js/cls_exporter.js"></script>
-
-<!-- FUNCTIONS TO BE EXECUTED AT LOADING TIME -->
-
-<script type="text/javascript">
+      function hideElements() {
+         document.getElementById('title').style.display = 'none'; // Hides the <h1> element
+         const buttonsDiv = document.querySelector('div'); // Assumes the first <div> contains the buttons
+         if (buttonsDiv) {
+             buttonsDiv.style.display = 'none'; // Hides the <div> with buttons
+         }
+         document.getElementById('divWhiteSpaceAtTheEnd').style.display = 'none';
+         document.getElementById('divLinkPropertyAnchor').style.display = 'none';
+         document.getElementById('fileListContainer').style.display = 'none';
+     }
+     
+     
+     // Function to save the current file
+      function saveCurrentFile(filePath, content) {
+         fetch('/save-file/' + encodeURIComponent(filePath), {
+            method: 'POST',
+            headers: {'Content-Type': 'text/plain'},
+            body: content
+         })
+         .then(function(response) {
+            if (!response.ok) {
+               window.alert('Error saving: ' + response.statusText);
+            } else {
+               window.alert('Saved successfully!');
+            }
+         });
+      }
    
+      function createFileLink(filePath) {
+         const li = document.createElement('li'); // Create list item
+         const link = document.createElement('a');
+         link.href = '#';
+         link.classList.add('file-link');
+     
+         // Extract the specific part of the file name
+         const parts = filePath.split('/');
+         const filenameWithExtension = parts[parts.length - 1]; // Get the last part of the path
+         const filename = filenameWithExtension.split('.')[0]; // Remove file extension
+     
+         link.textContent = filename;
+         link.setAttribute('data-filename', filePath);
+         link.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const filename = event.target.getAttribute('data-filename');
+            const fileContent = await fetchFileContent(filename);
+            //window.alert(fileContent)
+            if (fileContent) {
+               // Directly pass the file content to DataLoader
+               //dataloader = new DataLoader(callback,null,fileContent);
+               //gText.clickOnTheParseButton();
+               currentFilePath = filePath;
+               gText.init(await DataLoader.fromFileContent(fileContent,filename));
+               hideElements();
+
+            }
+         });
+         li.appendChild(link); // Append link to list item
+         return li;
+      }
+   
+      async function populateFileList() {
+         const fileListContainer = document.getElementById('fileListContainer');
+         const files = await fetchFileList();
+         if (files && files.length) {
+            files.forEach(file => {
+               const listItem = createFileLink(file);
+               fileListContainer.appendChild(listItem); // Append list item to list
+            });
+         }
+      }
+
    // START HERE
-   var isAnonymous = {{ anonymous|tojson }};
+   
    var gDivLinkPropertyAnchor =
       document.getElementById('divLinkPropertyAnchor');
 
-   //console.log(location.search);
    var gLoadingTime = true;
-   var gText;
+   var file_content = "{{ file_content | safe }}"; // Set by Flask
    var urlParams = new URLSearchParams(location.search);
-   gText = new Text();
+   var isAnonymous = {{ anonymous | tojson }};
+   if (urlParams.has("withAnnotations")) {
+      gText = new Text("withAnnotations");
+      gText.clickOnTheParseButton();
+   } else if (urlParams.has("withoutAnnotations")) {
+      gText = new Text("withoutAnnotations");
+      gText.clickOnTheParseButton();
+   } else {
+      gText = new Text();
+   }
+
+   
    async function init() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var logged_in = urlParams.get('logged_in') === 'True';
       if (isAnonymous) {
          if (window.user) {
             ul = document.createElement("ol");
@@ -121,16 +220,16 @@ The source code can be found at boberle.com.
          else
             gText.init();
       }
-      else{
-         
+      else if (logged_in) {
+         await populateFileList();
       }
    }
    init();
- 
+   
+
 </script>
 
-
-<script>
+    <script>
 // Function to create and show a modal with HTML content
 let isModalOpen = false;
 function showModal(htmlContent) {
@@ -164,7 +263,7 @@ function showModal(htmlContent) {
  }
 </script>
 
-<script>
+    <script>
    var gKeyDownHandler = function (e) {
 
       var tagName = document.activeElement.tagName;
@@ -260,8 +359,8 @@ function showModal(htmlContent) {
             gText.chainColl.expandAllChainsInPopup();
          }
       } else if (e.keyCode == 87) { // w = export
-         if (e.shiftKey) {
-            new Exporter().exportText(true);
+         if (currentFilePath && gText) {
+            saveCurrentFile(currentFilePath, new Exporter().computeText(true));
          } else {
             new Exporter().exportText();
          }
@@ -413,6 +512,7 @@ function showModal(htmlContent) {
                           
       }
    };
+
    if(gText) {
       document.body.addEventListener('keydown', gKeyDownHandler);
       window.onbeforeunload = function(e) {
@@ -422,6 +522,5 @@ function showModal(htmlContent) {
    }
 
 </script>
-
-</body>
+  </body>
 </html>

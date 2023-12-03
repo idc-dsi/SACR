@@ -4,7 +4,7 @@
     <h1>List of Files</h1>
     <ul>
         {% for file, url in links.items() %}
-            <li><a href="{{ url }}">{{ file }}</a></li>
+            <li><a href="{{ url_for('read_file', filename=os.path.basename(file)) }}">{{ os.path.splitext(os.path.basename(file))[0] }}</a></li>
         {% endfor %}
     </ul>
 </body>

@@ -31,6 +31,7 @@ body {
    /*background: black;*/a
 }
 
+/* Add your CSS rule here */
 div#divText {
    /*padding-bottom: 800px;*/
 }
@@ -269,3 +270,16 @@ body > table > tr > td > div {
    cursor: pointer;
  }
  
+ #fileListContainer {
+   list-style-type: none; /* Removes bullet points */
+   padding: 0;
+}
+
+.file-link {
+   display: block; /* Each link on a new line */
+   margin: 10px 0; /* Space between links */
+   color: blue; /* Link color */
+   text-decoration: underline; /* Underline links */
+}
+
+
