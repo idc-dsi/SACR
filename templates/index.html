@@ -368,7 +368,7 @@ The source code can be found at boberle.com.
           }
         } else if (e.keyCode == 87) {
           // w = export
-          if (currentFilePath && gText) {
+          if (e.shiftKey && currentFilePath && gText) {
             saveCurrentFile(currentFilePath, new Exporter().computeText(true))
           } else {
             new Exporter().exportText()
