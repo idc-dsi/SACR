@@ -5,10 +5,15 @@ import os
 import json
 from azure.storage.blob import BlobServiceClient, BlobClient
 from urllib.parse import unquote
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+
+
 
 # Flask App Initialization
 app = Flask(__name__)
 app.secret_key = 'My_Secret_Key'  # Replace with your actual secret key
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 CORS(app)
 
 
@@ -91,11 +96,13 @@ def save_file(filename):
 def index():
     anonymous = request.args.get('anonymous', 0)
     logged_in = session.get('logged_in', False)
-    return render_template('index.html', anonymous=anonymous,logged_in=logged_in )
+    return render_template('index.html', anonymous=anonymous,logged_in=logged_in)
 
 @app.route('/login')
 def login():
-    return azure.authorize(callback=url_for('authorized', _external=True))
+    callback_url = url_for('authorized', _external=True, _scheme='https')
+    return azure.authorize(callback=callback_url)
+
 
 @app.route('/?anonymous=1')
 def anonymous():
@@ -124,7 +131,7 @@ def authorized():
         )
     session['azure_token'] = (response['access_token'], '')
     # Set a session variable to indicate the user is logged in
-    return redirect(url_for('index', logged_in=True))
+    return redirect(url_for('index', logged_in=True, _scheme='https'))
  
 @azure.tokengetter
 def get_azure_oauth_token():
