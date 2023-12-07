@@ -43,7 +43,7 @@ The source code can be found at boberle.com.
 
     <script type="text/javascript">
       const VERSION = '5.4.0'
-      const OurVersion = '1.1.0'
+      const OurVersion = '1.1.1'
       const subTitle = 'To begin add authentication to the URL'
       document.getElementById('title').innerHTML = 'Coreference Chain Annotation Tool ' + OurVersion + ' (<a href="static/SACR- Annotator Guide .pdf" target="_blank">User Guide</a>)'
       var anonymous = '{{ anonymous }}' // Set by Flask
@@ -166,13 +166,32 @@ The source code can be found at boberle.com.
       }
       
       async function populateFileList() {
-        const fileListContainer = document.getElementById('fileListContainer')
-        const files = await fetchFileList()
+        const fileListContainer = document.getElementById('fileListContainer');
+        const files = await fetchFileList();
+      
         if (files && files.length) {
-          files.forEach((file) => {
-            const listItem = createFileLink(file)
-            fileListContainer.appendChild(listItem) // Append list item to list
-          })
+          // Group files by folder
+          const filesByFolder = files.reduce((acc, file) => {
+            const parts = file.split('/');
+            const folder = parts.slice(0, -1).join('/'); // Extract folder path
+            if (!acc[folder]) {
+              acc[folder] = [];
+            }
+            acc[folder].push(file);
+            return acc;
+          }, {});
+      
+          // Create list for each folder
+          Object.keys(filesByFolder).forEach(folder => {
+            const header = document.createElement('h3'); // Create a header for the folder
+            header.textContent = `${folder}:`;
+            fileListContainer.appendChild(header);
+      
+            filesByFolder[folder].forEach(file => {
+              const listItem = createFileLink(file);
+              fileListContainer.appendChild(listItem);
+            });
+          });
         }
       }
       

@@ -6,6 +6,8 @@ import json
 from azure.storage.blob import BlobServiceClient, BlobClient
 from urllib.parse import unquote
 from werkzeug.middleware.proxy_fix import ProxyFix
+import requests
+import jwt
 
 
 
@@ -13,7 +15,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 # Flask App Initialization
 app = Flask(__name__)
 app.secret_key = 'My_Secret_Key'  # Replace with your actual secret key
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
+#app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 CORS(app)
 
 
@@ -45,14 +47,26 @@ blob_service_client = BlobServiceClient(account_url=f"https://{storage_account_n
 @app.route('/list-files')
 def list_files():
     container_name = "podcasts-coref"
+    user_name = session.get('username')  # Retrieve the username from the session
+    list_of_users = ['amir.ejmail']
+    if not user_name:
+        return jsonify([])  # If the user is not logged in, return an empty list
+
     try:
         container_client = blob_service_client.get_container_client(container_name)
-        blob_list = container_client.list_blobs()
-        files = [blob.name for blob in blob_list]
-        return jsonify(files)  # Send a JSON response containing the file names
+        # Update to fetch blobs from the user-specific folder
+        if user_name in list_of_users:
+            blob_list = container_client.list_blobs(name_starts_with=user_name + '/')
+            files = [blob.name for blob in blob_list]
+        else:
+            blob_list = container_client.list_blobs()
+            files = [blob.name for blob in blob_list]
+            
+        return jsonify(files)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
+    
 @app.route('/read-file/<path:filename>')
 def read_file(filename):
     container_name = "podcasts-coref"
@@ -90,24 +104,6 @@ def save_file(filename):
         return jsonify({"error": str(e)}), 500
 
 
-
-
-@app.route('/')
-def index():
-    anonymous = request.args.get('anonymous', 0)
-    logged_in = session.get('logged_in', False)
-    return render_template('index.html', anonymous=anonymous,logged_in=logged_in)
-
-@app.route('/login')
-def login():
-    callback_url = url_for('authorized', _external=True, _scheme='https')
-    return azure.authorize(callback=callback_url)
-
-
-@app.route('/?anonymous=1')
-def anonymous():
-    return render_template('index.html/?anonymous=1', anonymous=True)
-
 @app.route('/api/getFileContent/<path:filename>')
 def get_file_content(filename):
     # Logic to fetch and return file content
@@ -121,6 +117,24 @@ def get_file_content(filename):
         return jsonify({"error": "File not found"}), 404
 
 
+@app.route('/')
+def index():
+    anonymous = request.args.get('anonymous', 0)
+    logged_in = session.get('logged_in', False)
+    return render_template('index.html', anonymous=anonymous,logged_in=logged_in)
+
+@app.route('/login')
+def login():
+    callback_url = url_for('authorized', _external=True, _scheme='https')
+    return azure.authorize(callback=callback_url)
+    #return azure.authorize(url_for('authorized', _external=True))
+
+
+@app.route('/?anonymous=1')
+def anonymous():
+    return render_template('index.html/?anonymous=1', anonymous=True)
+
+
 @app.route('/login/authorized')
 def authorized():
     response = azure.authorized_response()
@@ -129,9 +143,27 @@ def authorized():
             request.args['error_reason'],
             request.args['error_description']
         )
+
     session['azure_token'] = (response['access_token'], '')
+    
+    id_token = response.get('id_token')
+    if id_token:
+        # Decode the ID token
+        decoded_token = jwt.decode(id_token, options={"verify_signature": False})
+
+        # Extract the 'name'
+        user_name = decoded_token.get('name')
+        if user_name:
+            session['username'] = user_name
+            #print("User Name:", user_name)
+        
     # Set a session variable to indicate the user is logged in
-    return redirect(url_for('index', logged_in=True, _scheme='https'))
+    #for azure 
+    callback_url = url_for('index', logged_in=True, _scheme='https')
+    return redirect(callback_url)
+    
+    #for local host
+    #return redirect(url_for('index', logged_in=True))
  
 @azure.tokengetter
 def get_azure_oauth_token():
