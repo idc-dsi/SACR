@@ -458,90 +458,91 @@ The source code can be found at boberle.com.
           if (!isModalOpen) {
             isModalOpen = true
             showModal(`
-                                    <h1>Help</h1>
-                                    <p>This is a help window with useful information.</p>
-                                    <ul>
-                                       <li>To create a link with one token: double-click on that token.</li>
-                                       <li>To create a link with more than one token: click on the first and last token.</li>
-                                       <li>By default, a default name will be used.</li>
-                                       <li>Hold Shift to be asked for a name.</li>
-                                       <li>Hold Ctrl to automatically attach the link to the last selected chain.</li>
-                                    </ul>
-                        
-                                    <p>Create chain with drag and drop:</p>
-                                    <ul>
-                                    <li>Source is singleton, target is singleton: target will be attached to source chain.</li>
-                                    <li>Source is singleton and target is not singleton: source will be attached to target chain. Hold Ctrl for the reverse.</li>
-                                    <li>Source is not singleton and target is singleton: target will be attached to source chain.</li>
-                                    <li>Source is not singleton and target is not singleton: the chains will be merged (you will be asked to confirm). Hold Ctrl to detach the target from its chain and attach it to the source chain.</li>
-                                    </ul>
-                                    <p>Note that drag & drop is valid in the main window and in the popup, but also between them.</p>
-                        
-                                    <p>Replace a link:</p>
-                                    <ul>
-                                    <li>To replace a link, create a new link, then drag-and-drop, holding Shift (Ctrl+Shift for Firefox 54 and below), it to the link to be replaced. This will copy all the metadata (chain name and properties) to the target link, and remove the source link.</li>
-                                    </ul>
-                        
-                                    <p>Detach a link from each chain:</p>
-                                    <ul>
-                                    <li>Hold Shift and click on a link to attach it to a new chain.</li>
-                                    <li>Hold Ctrl and click on a link to attach it to the last selected chain.</li>
-                                    <li>Hold Ctrl and Shift and click on a link to attach it to a new chain (and be asked for the name of that chain).</li>
-                                    </ul>
-                        
-                                    <p>Edit links:</p>
-                                    <ul>
-                                    <li>Suppr: destroy the selected link.</li>
-                                    <li>Shift+Suppr: destroy all links.</li>
-                                    <li>C: change color of the selected chain.</li>
-                                    <li>N: change the name of the selected chain (ask, default set to current name).</li>
-                                    <li>M: change the name of the selected chain (ask, default set to content).</li>
-                                    <li>^Z: undo.</li>
-                                    </ul>
-                        
-                                    <p>Navigate:</p>
-                                    <ul>
-                                    <li>F: forward in text.</li>
-                                    <li>J: forward in chain.</li>
-                                    <li>B: backward in text.</li>
-                                    <li>K: backward in chain.</li>
-                                    <li>T: scroll to the selected link in the main window.</li>
-                                    </ul>
-                        
-                                    <p>Show and hide links:</p>
-                                    <ul>
-                                    <li>O: show only the selected chain.</li>
-                                    <li>S: show the search box.</li>
-                                    <li>U: hide non-true chains. Press again to toggle visibility.</li>
-                                    </ul>
-                        
-                                    <p>All chains and links popup:</p>
-                                    <ul>
-                                    <li>P: show the popup window of all chains and links.</li>
-                                    <li>E: expand all chains in the popup.</li>
-                                    <li>V: expand true chains in the popup.</li>
-                                    </ul>
-                        
-                                    <p>Save the text, the annotation, and the schema:</p>
-                                    <ul>
-                                    <li>W: write the text and annotations to a file.</li>
-                                    <li>A: write an HTML representation to a file.</li>
-                                    <li>X: write the schema to a file or show the schema in a dialog.</li>
-                                    <li>S: write the text and annotation to the server.</li>
-                                    </ul>
-                        
-                                    <p>Insert zero token (Ø):</p>
-                                    <ul>
-                                    <li>Z: insert Ø before/after the currently selected token.</li>
-                                    </ul>
-                        
-                                    <p>Display:</p>
-                                    <ul>
-                                    <li>I: increase/decrease font size.</li>
-                                    <li>L: display statistics.</li>
-                                    <li>P: show chain patterns.</li>
-                                    </ul>
-                                    `)
+            <h1>Help</h1>
+            <p>This is a help window with useful information.</p>
+            <ul>
+                <li>To create a link with one token: double-click on that token.</li>
+                <li>To create a link with more than one token: click on the first and last token.</li>
+                <li>By default, a default name will be used.</li>
+                <li>Hold Shift to be asked for a name.</li>
+                <li>Hold Ctrl to automatically attach the link to the last selected chain.</li>
+            </ul>
+
+            <p>Create chain with drag and drop:</p>
+            <ul>
+            <li>Source is singleton, target is singleton: target will be attached to source chain.</li>
+            <li>Source is singleton and target is not singleton: source will be attached to target chain. Hold Ctrl for the reverse.</li>
+            <li>Source is not singleton and target is singleton: target will be attached to source chain.</li>
+            <li>Source is not singleton and target is not singleton: the chains will be merged (you will be asked to confirm). Hold Ctrl to detach the target from its chain and attach it to the source chain.</li>
+            </ul>
+            <p>Note that drag & drop is valid in the main window and in the popup, but also between them.</p>
+
+            <p>Replace a link:</p>
+            <ul>
+            <li>To replace a link, create a new link, then drag-and-drop, holding Shift (Ctrl+Shift for Firefox 54 and below), it to the link to be replaced. This will copy all the metadata (chain name and properties) to the target link, and remove the source link.</li>
+            </ul>
+
+            <p>Detach a link from each chain:</p>
+            <ul>
+            <li>Hold Shift and click on a link to attach it to a new chain.</li>
+            <li>Hold Ctrl and click on a link to attach it to the last selected chain.</li>
+            <li>Hold Ctrl and Shift and click on a link to attach it to a new chain (and be asked for the name of that chain).</li>
+            </ul>
+
+            <p>Edit links:</p>
+            <ul>
+            <li>Suppr: destroy the selected link.</li>
+            <li>Shift+Suppr: destroy all links.</li>
+            <li>C: change color of the selected chain.</li>
+            <li>N: change the name of the selected chain (ask, default set to current name).</li>
+            <li>M: change the name of the selected chain (ask, default set to content).</li>
+            <li>^Z: undo.</li>
+            </ul>
+
+            <p>Navigate:</p>
+            <ul>
+            <li>F: forward in text.</li>
+            <li>J: forward in chain.</li>
+            <li>B: backward in text.</li>
+            <li>K: backward in chain.</li>
+            <li>T: scroll to the selected link in the main window.</li>
+            </ul>
+
+            <p>Show and hide links:</p>
+            <ul>
+            <li>O: show only the selected chain.</li>
+            <li>S: show the search box.</li>
+            <li>U: hide non-true chains. Press again to toggle visibility.</li>
+            </ul>
+
+            <p>All chains and links popup:</p>
+            <ul>
+            <li>P: show the popup window of all chains and links.</li>
+            <li>E: expand all chains in the popup.</li>
+            <li>V: expand true chains in the popup.</li>
+            </ul>
+
+            <p>Save the text, the annotation, and the schema:</p>
+            <ul>
+            <li>w: Save file to your computer.</li>  
+            <li>W: Save file to Azure storage.</li>
+            <li>A: write an HTML representation to a file.</li>
+            <li>X: write the schema to a file or show the schema in a dialog.</li>
+            <li>S: write the text and annotation to the server.</li>
+            </ul>
+
+            <p>Insert zero token (Ø):</p>
+            <ul>
+            <li>Z: insert Ø before/after the currently selected token.</li>
+            </ul>
+
+            <p>Display:</p>
+            <ul>
+            <li>I: increase/decrease font size.</li>
+            <li>L: display statistics.</li>
+            <li>P: show chain patterns.</li>
+            </ul>
+            `)
           }
         }
       }
