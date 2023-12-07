@@ -15,7 +15,7 @@ import jwt
 # Flask App Initialization
 app = Flask(__name__)
 app.secret_key = 'My_Secret_Key'  # Replace with your actual secret key
-#app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 CORS(app)
 
 
