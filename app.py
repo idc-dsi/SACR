@@ -1,6 +1,7 @@
-from flask import Flask, redirect, url_for, render_template, request, session, jsonify
+from flask import Flask, redirect, url_for, render_template, request, session, jsonify, Response
 from flask_oauthlib.client import OAuth
 from flask_cors import CORS
+from flask_compress import Compress
 import os
 import json
 from azure.storage.blob import BlobServiceClient, BlobClient
@@ -12,8 +13,10 @@ import jwt
 
 
 
+
 # Flask App Initialization
 app = Flask(__name__)
+Compress(app)
 app.secret_key = 'My_Secret_Key'  # Replace with your actual secret key
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 CORS(app)
@@ -83,21 +86,22 @@ def read_file(filename):
     except Exception as e:
         return jsonify({"error": str(e)}), 404
 
+
 @app.route('/save-file/<path:filename>', methods=['POST'])
 def save_file(filename):
     container_name = "podcasts-coref"
     try:
         # Decode the URL-encoded filename
         decoded_filename = unquote(filename)
-        content = request.data.decode('utf-8')
-        
+        content = request.data.decode('utf-8') 
+        content_bytes = content.encode('utf-8')
         # Logic to save content to the file
         # Assuming using Azure Blob Storage
         blob_client = BlobClient(account_url=f"https://{storage_account_name}.blob.core.windows.net", 
                                  container_name=container_name, 
                                  blob_name=decoded_filename, 
                                  credential=storage_account_key)
-        blob_client.upload_blob(content, overwrite=True)
+        blob_client.upload_blob(content_bytes, overwrite=True)
 
         return jsonify({"message": "File saved successfully"}), 200
     except Exception as e:
