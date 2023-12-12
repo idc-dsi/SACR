@@ -51,7 +51,7 @@ blob_service_client = BlobServiceClient(account_url=f"https://{storage_account_n
 def list_files():
     container_name = "podcasts-coref"
     user_name = session.get('username')  # Retrieve the username from the session
-    list_of_users = ['amir.ejmail']
+    list_of_users = ['amir.ejmail','alex.barell','khalil.nashef','omri.magen','shani.aviv','tal.cohen','yasmeen.karram']
     if not user_name:
         return jsonify([])  # If the user is not logged in, return an empty list
 

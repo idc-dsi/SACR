@@ -135,35 +135,40 @@ The source code can be found at boberle.com.
       }
       
       function createFileLink(filePath) {
-        const li = document.createElement('li') // Create list item
-        const link = document.createElement('a')
-        link.href = '#'
-        link.classList.add('file-link')
-      
+        const li = document.createElement('li'); // Create list item
+    
         // Extract the specific part of the file name
-        const parts = filePath.split('/')
-        const filenameWithExtension = parts[parts.length - 1] // Get the last part of the path
-        const filename = filenameWithExtension.split('.')[0] // Remove file extension
-      
-        link.textContent = filename
-        link.setAttribute('data-filename', filePath)
-        link.addEventListener('click', async (event) => {
-          event.preventDefault()
-          const filename = event.target.getAttribute('data-filename')
-          const fileContent = await fetchFileContent(filename)
-          //window.alert(fileContent)
-          if (fileContent) {
-            // Directly pass the file content to DataLoader
-            //dataloader = new DataLoader(callback,null,fileContent);
-            //gText.clickOnTheParseButton();
-            currentFilePath = filePath
-            gText.init(await DataLoader.fromFileContent(fileContent, filename))
-            hideElements()
-          }
-        })
-        li.appendChild(link) // Append link to list item
-        return li
-      }
+        const parts = filePath.split('/');
+        const filenameWithExtension = parts[parts.length - 1]; // Get the last part of the path
+        const filename = filenameWithExtension.split('.')[0]; // Remove file extension
+    
+        // Check if the filename is biqawi_#2 and if the path does not include Biqawi_Podcasts_OG
+        if (filename === 'biqawi_#2' && !filePath.includes('Biqawi_Podcasts_OG')) {
+            // In this case, do not create a link
+            
+        } else {
+            // Otherwise, create a link
+            const link = document.createElement('a');
+            link.href = '#';
+            link.classList.add('file-link');
+            link.textContent = filename;
+            link.setAttribute('data-filename', filePath);
+            link.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const filename = event.target.getAttribute('data-filename');
+                const fileContent = await fetchFileContent(filename);
+                if (fileContent) {
+                    currentFilePath = filePath;
+                    gText.init(await DataLoader.fromFileContent(fileContent, filename));
+                    hideElements();
+                }
+            });
+            li.appendChild(link); // Append link to list item
+        }
+    
+        return li;
+    }
+    
       
       async function populateFileList() {
         const fileListContainer = document.getElementById('fileListContainer');
