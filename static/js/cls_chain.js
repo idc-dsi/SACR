@@ -41,7 +41,7 @@ class ChainCollection {
    }
 
    removeChain(chain) {
-      for (var i=0; i<this.chains.length; i++) {
+      for (var i = 0; i < this.chains.length; i++) {
          if (this.chains[i] === chain) {
             this.chains.splice(i, 1);
             break;
@@ -96,10 +96,6 @@ class ChainCollection {
    }
 
    checkName(testName) {
-      // correct?
-      if (testName.search(/^[-\p{Alphabetic}0-9_]+$/u) == -1) {
-         return false;
-      }
       // avalaible?
       for (var chain of this.chains) {
          if (chain.name === testName) {
@@ -111,7 +107,7 @@ class ChainCollection {
 
    update() {
       this.chains =
-         this.chains.filter(function(chain) { return chain.links.length > 0; });
+         this.chains.filter(function (chain) { return chain.links.length > 0; });
       for (var c of this.chains) {
          c.redraw();
       }
@@ -213,6 +209,12 @@ class ChainCollection {
       return null;
    }
 
+   transferChain(sourceChain, targetChain) {
+      if (sourceChain === targetChain)
+         return false;
+      while (sourceChain.count)
+         this.transferLink(sourceChain.links[0], targetChain);
+   }
    transferLink(link, targetChain) {
       var sourceChain = this.getChainByLink(link);
       if (sourceChain === targetChain) {
@@ -241,7 +243,7 @@ class ChainCollection {
       var links = this.getLinks();
       Link.sortLinks(links);
       var index = undefined;
-      for (var i=0; i<links.length; i++) {
+      for (var i = 0; i < links.length; i++) {
          if (links[i] === refLink) {
             index = i;
             break;
@@ -251,13 +253,13 @@ class ChainCollection {
          return null;
       }
       if (backward) {
-         for (var i=index-1; i>=0; i--) {
+         for (var i = index - 1; i >= 0; i--) {
             if (!onlyVisible || links[i].isVisible) {
                return links[i];
             }
          }
       } else {
-         for (var i=index+1; i<links.length; i++) {
+         for (var i = index + 1; i < links.length; i++) {
             if (!onlyVisible || links[i].isVisible) {
                return links[i];
             }
@@ -357,11 +359,11 @@ class ChainCollection {
          }
       }
       var res = "";
-      var keys = Object.keys(dic).sort(function(a,b){
-            if (dic[a] < dic[b]) return -1;
-            if (dic[a] > dic[b]) return 1;
-            return 0;
-         });
+      var keys = Object.keys(dic).sort(function (a, b) {
+         if (dic[a] < dic[b]) return -1;
+         if (dic[a] > dic[b]) return 1;
+         return 0;
+      });
       for (var key of keys) {
          res += key + ": " + dic[key] + "\n";
       }
@@ -378,7 +380,7 @@ class Chain {
       if (gLoadingTime) {
          return;
       }
-      chains.sort(function(a,b) {
+      chains.sort(function (a, b) {
          /*if (!a.count) {
             return -1;
          }
@@ -388,14 +390,15 @@ class Chain {
          // a is after b
          if (a.firstLink.span.compareDocumentPosition(b.firstLink.span) & 2) {
             return 1;
-         // a is before b
+            // a is before b
          } else if (a.firstLink.span.compareDocumentPosition(b.firstLink.span) & 4) {
             return -1;
          }
-         return 0; });
+         return 0;
+      });
    }
 
-   constructor(name) {
+   constructor(name, initialProperties) {
       this._name = name;
       this._color = undefined;
       this.links = new Array();
@@ -408,7 +411,7 @@ class Chain {
       this.popupDivHeadingParagraph.appendChild(this.popupDivHeading);
       this.popupDivHeading.textContent = this._name;
       var that = this;
-      this.popupDivHeading.onclick = function(e) {
+      this.popupDivHeading.onclick = function (e) {
          if (e.ctrlKey || e.metaKey) {
             that.firstLink.select();
          } else {
@@ -426,6 +429,21 @@ class Chain {
       this.popupDiv.appendChild(this.popupLinkDiv);
       // set the color
       this.color = ColorManager.getDefaultColor();
+
+      if (gText.schema.isEmpty) {
+         this.metadata = null;
+         if (gText.showPropertyWarnings && initialProperties
+            && Object.keys(initialProperties).length) {
+            alert("No schema has been defined, yet there are some properties "
+               + "in the file.");
+         }
+      } else {
+         if (!initialProperties) {
+            initialProperties = {};
+         }
+         this.metadata
+            = gText.schema.buildChainProperties(initialProperties);
+      }
    }
 
    /* note: chains are sorted every time a link is added, so no need to sort
@@ -437,7 +455,8 @@ class Chain {
 
    get isTrueChain() {
       return (this.links.length >= gText.minLinks)
-         || (name.indexOf('_') == 0);
+         || (name.indexOf('_') == 0)
+         || (this.metadata && Object.keys(this.metadata).length === 0);
    }
 
    get name() {
@@ -492,7 +511,7 @@ class Chain {
    addLink(link) {
       if (!gText.chainColl.isThisChainInCollection(this)) {
          alert("DEBUG WARNING: before adding link to chain, you should "
-            +"add the chain to the collection.");
+            + "add the chain to the collection.");
       }
       var wasTrueChain = this.isTrueChain;
       this.links.push(link);
@@ -512,7 +531,7 @@ class Chain {
    // is no more link left!
    removeLink(link) {
       var wasTrueChain = this.isTrueChain;
-      for (var i=0; i<this.links.length; i++) {
+      for (var i = 0; i < this.links.length; i++) {
          if (this.links[i] === link) {
             this.links.splice(i, 1);
             break;
@@ -553,7 +572,7 @@ class Chain {
 
    /* Returns the index of `link' in this.links. */
    getIndexOf(link) {
-      for (var i=0; i<this.links.length; i++) {
+      for (var i = 0; i < this.links.length; i++) {
          if (this.links[i] === link) {
             return i;
          }
@@ -569,13 +588,13 @@ class Chain {
          return null;
       }
       if (backward) {
-         for (var i=index-1; i>=0; i--) {
+         for (var i = index - 1; i >= 0; i--) {
             if (!onlyVisible || this.links[i].isVisible) {
                return this.links[i];
             }
          }
       } else {
-         for (var i=index+1; i<this.links.length; i++) {
+         for (var i = index + 1; i < this.links.length; i++) {
             if (!onlyVisible || this.links[i].isVisible) {
                return this.links[i];
             }

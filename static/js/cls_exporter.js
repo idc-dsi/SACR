@@ -30,7 +30,7 @@ class Exporter {
     * - https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
     */
    static utf8_to_b64(str) {
-       return window.btoa(unescape(encodeURIComponent(str)));
+      return window.btoa(unescape(encodeURIComponent(str)));
    }
 
    /* see:
@@ -40,12 +40,12 @@ class Exporter {
       var anchor = document.createElement('a');
       //a.href = 'data:'+mimetype+';charset=UTF-8;base64,'+btoa(content);
       //data uri scheme
-      anchor.href = 'data:text/plain;charset=UTF-8;base64,'+
+      anchor.href = 'data:text/plain;charset=UTF-8;base64,' +
          Exporter.utf8_to_b64(text);
       anchor.innerHTML = 'download';
       anchor.download = filename;
       document.body.appendChild(anchor); // this is necessary (not in the
-         // source)
+      // source)
       anchor.click();
       document.body.removeChild(anchor);
    }
@@ -54,24 +54,24 @@ class Exporter {
    /* FUNCTIONS FOR FILENAME */
 
    static datePadding(text) {
-      if ((text+"").length == 1) {
-         return "0"+text;
+      if ((text + "").length == 1) {
+         return "0" + text;
       } else {
-         return text+"";
+         return text + "";
       }
    }
 
-  static getDateString() {
-      var d = new Date(); 
+   static getDateString() {
+      var d = new Date();
       var str = d.getFullYear()
-         + Exporter.datePadding(d.getMonth()+1)
+         + Exporter.datePadding(d.getMonth() + 1)
          + Exporter.datePadding(d.getDate())
          + "-"
          + Exporter.datePadding(d.getHours())
          + Exporter.datePadding(d.getMinutes())
-         + Exporter.datePadding(d.getSeconds()); 
-     //console.log(str);
-     return str;
+         + Exporter.datePadding(d.getSeconds());
+      //console.log(str);
+      return str;
    }
 
    static computeNewFilename(originalFilename) {
@@ -83,9 +83,9 @@ class Exporter {
       newFilename = newFilename.replace(/\d{8}-\d{6}/, dateString);
       if (newFilename == originalFilename) {
          newFilename = originalFilename;
-         newFilename = newFilename.replace(/(\.[^.]+)$/, "_"+dateString+"$1");
+         newFilename = newFilename.replace(/(\.[^.]+)$/, "_" + dateString + "$1");
          if (newFilename == originalFilename) {
-            newFilename = originalFilename+"_"+dateString;
+            newFilename = originalFilename + "_" + dateString;
          }
       }
       return newFilename;
@@ -100,7 +100,7 @@ class Exporter {
     *        - span (with the name) (CLASS_METADATA)
     *           - anchor (with the name)
     */
-   convertElementToText (element, complete) {
+   convertElementToText(element, complete) {
       var result = '';
       for (var e of element.childNodes) {
          if (e.nodeType == 3) { // text
@@ -124,17 +124,17 @@ class Exporter {
                               result += ':' + link.properties.getString();
                            }
                         }
-                        catch(e) {
+                        catch (e) {
                            alert("Error serializing link " + link.name + ": " + e);
                            throw ("Error serializing link " + link.name + ": " + e);
                         }
                      }
-                     result +=  ' ';
+                     result += ' ';
                   }
                } else if (e.classList.contains(CLASS_LINK)) {
                   result += '{' + this.convertElementToText(e, complete) + '}';
                } else {
-                  alert("Found a 'span' which is neither a link nor a metadata (className: '"+elements[i].className+"')...");
+                  alert("Found a 'span' which is neither a link nor a metadata (className: '" + elements[i].className + "')...");
                }
             } else if (e.tagName == 'A') {
                result += e.textContent + "​";
@@ -143,13 +143,13 @@ class Exporter {
                result += "\\n\n";
                //alert('after:\"'+result+"\"");
             } else {
-               alert("Found a <"+e.tagName+">...");
+               alert("Found a <" + e.tagName + ">...");
             }
          } else {
-            alert("Found a element of node type: "+e.nodeType+"...");
+            alert("Found a element of node type: " + e.nodeType + "...");
          }
       }
-      return result.replaceAll(/​(\s)/g, "$1");
+      return result.replaceAll(/​}/g, "}​").replaceAll(/​(\s)/g, "$1");
    }
 
    convertDomToString(complete) {
@@ -162,10 +162,10 @@ class Exporter {
             } else if (par.classList.contains(CLASS_COMMENT)) {
                result += Array.prototype.filter.call(par.childNodes, (e) => e.nodeType == 3).map((e) => e.textContent).join("") + "\n\n";
             } else {
-               alert("Found a 'p' which is neither a text nor an info: `"+par.textContent+"'.");
+               alert("Found a 'p' which is neither a text nor an info: `" + par.textContent + "'.");
             }
          } else {
-            alert("A child of the div 'text' is not a paragraph (node type: "+pars[i].nodeType+").");
+            alert("A child of the div 'text' is not a paragraph (node type: " + pars[i].nodeType + ").");
          }
       }
       return result;
@@ -181,8 +181,17 @@ class Exporter {
       return result;
    }
 
+   getMetadata() {
+      var result = '';
+      for (var chain of gText.chainColl.chains) {
+         if (chain.metadata)
+            result += '#chainmetadata:' + chain.name + ':' + chain.metadata.getString() + "\n";
+      }
+      return result;
+   }
+
    getTokenizationType() {
-      return "#TOKENIZATION-TYPE:"+gText.tokenizationType.toString()+"\n";
+      return "#TOKENIZATION-TYPE:" + gText.tokenizationType.toString() + "\n";
    }
 
 
@@ -190,6 +199,7 @@ class Exporter {
       var result = "";
       result += this.convertDomToString(complete);
       result += "\n\n" + this.getColors() + "\n";
+      result += this.getMetadata() + "\n";
       result += this.getTokenizationType() + "\n";
       return result;
    }
@@ -225,17 +235,17 @@ class Exporter {
                      }
                   }
                } else {
-                  alert("Found a 'span' which is neither a link nor a metadata (className: '"+elements[i].className+"')...");
+                  alert("Found a 'span' which is neither a link nor a metadata (className: '" + elements[i].className + "')...");
                }
             } else if (e.tagName == 'A') {
                result += e.textContent;
             } else if (e.tagName == 'BR') {
                result += "</br>";
             } else {
-               alert("Found a <"+e.tagName+">...");
+               alert("Found a <" + e.tagName + ">...");
             }
          } else {
-            alert("Found a element of node type: "+e.nodeType+"...");
+            alert("Found a element of node type: " + e.nodeType + "...");
          }
       }
       return result;
@@ -251,10 +261,10 @@ class Exporter {
             } else if (par.classList.contains(CLASS_COMMENT)) {
                result += `<p style="font-family: mono; background-color: antiquewhite; padding: 10px; margin: 0px">${par.textContent}</p>\n`;
             } else {
-               alert("Found a 'p' which is neither a text nor an info: `"+par.textContent+"'.");
+               alert("Found a 'p' which is neither a text nor an info: `" + par.textContent + "'.");
             }
          } else {
-            alert("A child of the div 'text' is not a paragraph (node type: "+pars[i].nodeType+").");
+            alert("A child of the div 'text' is not a paragraph (node type: " + pars[i].nodeType + ").");
          }
       }
       return result;
@@ -277,14 +287,14 @@ class Exporter {
       Exporter.writeToFile(text, filename);
    }
 
-   exportHTML(brackets=false) {
+   exportHTML(brackets = false) {
       var filename = Exporter.computeNewFilename(gText.textFilename) + ".html";
       var text = this.computeHTML(brackets);
       Exporter.writeToFile(text, filename);
    }
 
    exportSchema() {
-      var filename = Exporter.computeNewFilename(gText.textFilename+"-schema");
+      var filename = Exporter.computeNewFilename(gText.textFilename + "-schema");
       var text = this.computeSchema();
       Exporter.writeToFile(text, filename);
    }

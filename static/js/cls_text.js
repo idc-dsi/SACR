@@ -48,6 +48,8 @@ class Text {
 
    makeTable() {
       var table = document.createElement("table");
+      table.id = "textTable";
+      table.style.display = "none";
       var row = document.createElement("tr");
       table.appendChild(row);
       var textContainer = document.createElement("td");
@@ -74,6 +76,7 @@ class Text {
          Array.prototype.forEach.call(this.div.getElementsByTagName("p"), (p) => p.style.setProperty("direction", "rtl", "important"));
       }
       this.chainColl.sortLinksOfAllChains();
+      document.getElementById("textTable").style.display = "block";
    };
 
    init(dataLoader = null) {
@@ -272,8 +275,11 @@ class Text {
       if (!link) {
          return false;
       }
-      var chain = new Chain(name);
-      this.chainColl.addChain(chain);
+      var chain = this.chainColl.getChainByName(name);
+      if (!chain) {
+         chain = new Chain(name);
+         this.chainColl.addChain(chain);
+      }
       chain.addLink(link);
       link.select(); // once the link is added to the chain, so the chain
       // is selected in the popup
@@ -417,7 +423,7 @@ class Text {
       }
       var selectedLink = this.chainColl.getSelectedLink();
       var name = undefined;
-      if (askForName && defaultIsCurrentName) {
+      if (askForName && defaultIsCurrentName && !selectedLink._name.match(/^M[0-9]+$/)) {
          name = CommonFunctions.getChainName(this.chainColl, true,
             selectedLink._name);
       } else if (askForName) {
@@ -427,7 +433,11 @@ class Text {
          name = CommonFunctions.getChainName(this.chainColl, false);
       }
       if (name) {
-         chain.name = name;
+         var targetChain = this.chainColl.getChainByName(name);
+         if (targetChain)
+            this.chainColl.transferChain(chain, targetChain);
+         else
+            chain.name = name;
          this.markChanged();
       }
    }

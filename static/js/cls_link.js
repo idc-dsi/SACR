@@ -35,15 +35,16 @@ class Link {
       if (gLoadingTime) {
          return;
       }
-      links.sort(function(a,b) {
+      links.sort(function (a, b) {
          // a is after b
          if (a.span.compareDocumentPosition(b.span) & 2) {
             return 1;
-         // a is before b
+            // a is before b
          } else if (a.span.compareDocumentPosition(b.span) & 4) {
             return -1;
          }
-         return 0; });
+         return 0;
+      });
    }
 
    /* @param elements: The first and last elements of the link.  They may be
@@ -69,7 +70,7 @@ class Link {
             break;
          }
          cur = cur.nextSibling;
-      } 
+      }
       elements[0].parentNode.replaceChild(this.span, elements[0]);
       for (var e of toBeMoved) {
          this.span.appendChild(e);
@@ -93,7 +94,7 @@ class Link {
       if (gText.schema.isEmpty) {
          this.properties = null;
          if (gText.showPropertyWarnings && initialProperties
-               && Object.keys(initialProperties).length) {
+            && Object.keys(initialProperties).length) {
             alert("No schema has been defined, yet there are some properties "
                + "in the file.");
          }
@@ -109,7 +110,7 @@ class Link {
 
    _addEvents() {
       var that = this;
-      this.span.onclick = function(e) {
+      this.span.onclick = function (e) {
          if ((e.ctrlKey || e.metaKey) && e.shiftKey) { // attach to new chain (ask for name)
             that.select();
             var name = CommonFunctions.getChainName(gText.chainColl, true,
@@ -146,16 +147,16 @@ class Link {
       this.popupAnchor.onclick = this.span.onclick;
       // drag and drop
       this.span.draggable = true;
-      this.span.ondragstart = function(e) {
+      this.span.ondragstart = function (e) {
          e.stopPropagation(); // when overlapping span (link inside link)
          e.dataTransfer.setData("text", that.id.toString());
          // e.target is the source element (ie the element that is dragged)
          //useless: e.dataTransfer.effectAllowed = 'all';
       };
-      this.span.ondragover = function(e) {
+      this.span.ondragover = function (e) {
          e.preventDefault(); // allow the drop (blocked by default)
       };
-      this.span.ondrop = function(e) {
+      this.span.ondrop = function (e) {
          // NOTE: e.target is the target element (ie the element on which an
          // element is dropped): don't use it, but use `this/that'
          e.stopPropagation(); // when overlapping span (link inside link)
@@ -233,7 +234,7 @@ class Link {
       //return text.substr(text.indexOf(" ")+1);
       var clone = this.span.cloneNode(true);
       var badguys = clone.getElementsByClassName(CLASS_METADATA);
-      for (var i=badguys.length-1; i>=0; i--) {
+      for (var i = badguys.length - 1; i >= 0; i--) {
          badguys[i].parentNode.removeChild(badguys[i]);
       }
       return clone.textContent;
@@ -325,7 +326,7 @@ class Link {
       } else {
          this.span.classList.remove(CLASS_SELECTED);
          this.span.style.backgroundColor = "rgba(0,0,0,0)"; // transparent
-            // (for selection of a link that has nested links)
+         // (for selection of a link that has nested links)
          this.popupAnchor.classList.remove(CLASS_SELECTED);
       }
       if (!gText.schema.isEmpty) {
@@ -334,27 +335,27 @@ class Link {
             this.properties.div.insertBefore(gText.schema.button,
                this.properties.div.firstChild);
             for (var div of gDivLinkPropertyAnchor.childNodes) {
-                gDivLinkPropertyAnchor.removeChild(div);
+               gDivLinkPropertyAnchor.removeChild(div);
             }
-            if(chain && chain.metadata && chain.metadata.div.parentNode !== gDivLinkPropertyAnchor)
+            if (chain && chain.metadata && chain.metadata.div.parentNode !== gDivLinkPropertyAnchor)
                gDivLinkPropertyAnchor.insertBefore(chain.metadata.div, gDivLinkPropertyAnchor.firstChild);
-            if(this.properties && this.properties.div.parentNode !== gDivLinkPropertyAnchor)
+            if (this.properties && this.properties.div.parentNode !== gDivLinkPropertyAnchor)
                gDivLinkPropertyAnchor.appendChild(this.properties.div);
             gDivLinkPropertyAnchor.style.display = 'block';
          } else {
             if (gDivLinkPropertyAnchor.childNodes.length) {
-               if(chain && chain.metadata && chain.metadata.div.parentNode === gDivLinkPropertyAnchor) {
+               if (chain && chain.metadata && chain.metadata.div.parentNode === gDivLinkPropertyAnchor) {
                   var keepChainMetadata = false;
                   for (var link of chain.links) {
                      if (link.isSelected) {
                         keepChainMetadata = true;
                         break;
-		     }
+                     }
                   }
                   if (!keepChainMetadata)
                      gDivLinkPropertyAnchor.removeChild(chain.metadata.div);
                }
-               if(this.properties && this.properties.div.parentNode === gDivLinkPropertyAnchor)
+               if (this.properties && this.properties.div.parentNode === gDivLinkPropertyAnchor)
                   gDivLinkPropertyAnchor.removeChild(this.properties.div);
                gDivLinkPropertyAnchor.style.display = 'none';
             }

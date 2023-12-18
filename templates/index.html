@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 
-<!--                   
+<!--
 
 SACR (Script d'Annotation de Chaînes de Référence): a coreference chain
 annotation tool.
@@ -21,7 +21,8 @@ If you have any question, contact me at boberle.com.
 
 The source code can be found at boberle.com.
 
-                   -->
+-->
+
 
 <html lang="en">
   <head>
@@ -31,10 +32,15 @@ The source code can be found at boberle.com.
   </head>
   <body>
     <h1 id="title">SACR</h1>
-    <div>
-      <button onclick="location.href='/login'">Login with Azure</button>
-      <button onclick="location.href='/?anonymous=1'">Access Anonymously</button>
-    </div>
+    <div class="button-container">
+      <div class="left-buttons">
+          <button onclick="location.href='/login'">Login with Azure</button>
+          <button onclick="location.href='/?anonymous=1'">Access Anonymously</button>
+      </div>
+      <button id="btnBackToList" style="display: none;">Back to List</button>
+  </div>
+  
+
     <div id="divWhiteSpaceAtTheEnd"></div>
     <div id="divLinkPropertyAnchor"></div>
     <div id="fileListContainer"></div>
@@ -46,8 +52,7 @@ The source code can be found at boberle.com.
       const OurVersion = '1.1.1'
       const subTitle = 'To begin add authentication to the URL'
       document.getElementById('title').innerHTML = 'Coreference Chain Annotation Tool ' + OurVersion + ' (<a href="static/SACR- Annotator Guide .pdf" target="_blank">User Guide</a>)'
-      var anonymous = '{{ anonymous }}' // Set by Flask
-      
+            
       const CLASS_PARAGRAPH = 'paragraph'
       const CLASS_TOKEN = 'token'
       const CLASS_COMMENT = 'comment'
@@ -84,17 +89,23 @@ The source code can be found at boberle.com.
     <!-- FUNCTIONS TO BE EXECUTED AT LOADING TIME -->
 
     <script type="text/javascript">
+      var anonymous = '{{ anonymous }}' // Set by Flask
       // Function to fetch file content
       async function fetchFileContent(filename) {
         try {
-          const response = await fetch('/read-file/' + encodeURIComponent(filename))
-          const data = await response.json()
-          return data.content
+          const response = await fetch('/read-file/' + encodeURIComponent(filename));
+          if (!response.ok) {
+            throw new Error('Network response was not ok.');
+          }
+          // Handle response as plain text instead of JSON
+          const data = await response.text();
+          return data;
         } catch (error) {
-          console.error('Error fetching file content:', error)
-          return null
+          console.error('Error fetching file content:', error);
+          return null;
         }
       }
+      
       
       // Function to fetch file list
       async function fetchFileList() {
@@ -108,16 +119,42 @@ The source code can be found at boberle.com.
         }
       }
       
-      function hideElements() {
-        document.getElementById('title').style.display = 'none' // Hides the <h1> element
-        const buttonsDiv = document.querySelector('div') // Assumes the first <div> contains the buttons
-        if (buttonsDiv) {
-          buttonsDiv.style.display = 'none' // Hides the <div> with buttons
-        }
-        document.getElementById('divWhiteSpaceAtTheEnd').style.display = 'none'
-        document.getElementById('divLinkPropertyAnchor').style.display = 'none'
-        document.getElementById('fileListContainer').style.display = 'none'
+      function handleBackToListClick() {
+        var confirmation = confirm("Are you sure you want to go back to the list?");
+        if (confirmation) {
+        window.location.href = '/?logged_in=True'; // Redirect to the main page
+        setTimeout(() => {
+            // Simulate a click on the 'Login with Azure' button
+            const loginButton = document.querySelector("button[onclick*='/login']");
+            document.getElementById('fileListContainer').style.display = 'block'
+            const buttonsDiv = document.querySelector('.button-container .left-buttons');
+            if (buttonsDiv) {
+                buttonsDiv.style.display = 'flex';
+            }
+        }, 1000); // Wait for the page to load
       }
+    }
+    
+    document.getElementById('btnBackToList').addEventListener('click', handleBackToListClick);
+    
+    
+      
+    function hideElements() {
+      // Hide the div containing the first two buttons
+      const buttonsDiv = document.querySelector('.button-container .left-buttons');
+      if (buttonsDiv) {
+          buttonsDiv.style.display = 'none';
+      }
+  
+      // Hide other elements as needed
+      document.getElementById('divWhiteSpaceAtTheEnd').style.display = 'none';
+      document.getElementById('divLinkPropertyAnchor').style.display = 'none';
+      document.getElementById('fileListContainer').style.display = 'none';
+  
+      // Show the 'Back to List' button
+      document.getElementById('btnBackToList').style.display = 'block';
+  }
+  
       
       // Function to save the current file
       function saveCurrentFile(filePath, content) {
@@ -203,11 +240,11 @@ The source code can be found at boberle.com.
       // START HERE
       
       var gDivLinkPropertyAnchor = document.getElementById('divLinkPropertyAnchor')
-      
-      var gLoadingTime = true
+  
+      var gLoadingTime = true;
+      var gText;
       var file_content = '{{ file_content | safe }}' // Set by Flask
-      var urlParams = new URLSearchParams(location.search)
-      //var isAnonymous = {{ anonymous | tojson}};
+      var urlParams = new URLSearchParams(window.location.search)
       if (urlParams.has('withAnnotations')) {
         gText = new Text('withAnnotations')
         gText.clickOnTheParseButton()
@@ -219,29 +256,55 @@ The source code can be found at boberle.com.
       }
       
       async function init() {
-        var urlParams = new URLSearchParams(window.location.search)
-        var logged_in = urlParams.get('logged_in') === 'True'
-        var isAnonymous = urlParams.get('anonymous') === '1'
+        // Retrieve URL parameters
+        var urlParams = new URLSearchParams(window.location.search);
+    
+        // Determine if the user is logged in based on URL parameter
+        var logged_in = urlParams.get('logged_in') === 'True';
+    
+        // Check if the user is in anonymous mode based on URL parameter
+        var isAnonymous = urlParams.get('anonymous') === '1';
+    
+        // If the user is in anonymous mode
         if (isAnonymous) {
-          if (window.user) {
-            ul = document.createElement('ol')
-            fetchdocs().then((docs) => {
-              Array.prototype.forEach.call(docs, (doc) => {
-                li = document.createElement('li')
-                a = document.createElement('a')
-                a.href = '?textUrl=static/api/doc/' + window.user.name + '/' + doc + '&schemaUrl=txt/scheme-iahlt.txt&tokenizationType=4'
-                a.innerText = doc
-                li.appendChild(a)
-                ul.appendChild(li)
-              })
-              document.body.appendChild(ul)
-            })
-          } else gText.init()
+            // Check if a user object exists in the window scope
+            if (window.user) {
+                // Create an ordered list element
+                var ul = document.createElement('ol');
+    
+                // Fetch documents asynchronously
+                fetchdocs().then((docs) => {
+                    // Iterate over each document
+                    docs.forEach((doc) => {
+                        // Create list item and anchor elements for each document
+                        var li = document.createElement('li');
+                        var a = document.createElement('a');
+    
+                        // Set the hyperlink reference to point to the specific document
+                        a.href = '?textUrl=static/api/doc/' + window.user.name + '/' + doc +
+                                 '&schemaUrl=txt/scheme-iahlt.txt&tokenizationType=4';
+                        a.innerText = doc;
+    
+                        // Append the anchor to the list item, and the list item to the ordered list
+                        li.appendChild(a);
+                        ul.appendChild(li);
+                    });
+    
+                    // Append the ordered list to the document body
+                    document.body.appendChild(ul);
+                });
+            } else {
+                // Initialize gText if no user object exists
+                gText.init();
+            }
         } else if (logged_in) {
-          await populateFileList()
+            // If the user is logged in, populate the file list
+            populateFileList();
         }
-      }
-      init()
+    }
+    
+      
+      init();
     </script>
 
     <script>

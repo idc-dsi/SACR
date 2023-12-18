@@ -63,8 +63,8 @@ class CommonFunctions {
 
    static removeDiacritics(text) {
       // some ideas:: http://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript
-      text = text.replace(/[^-A-Za-z0-9]/g, function(a){ return a in diacriticsMap ? diacriticsMap[a] : ''});
-      return text.replace(/-./g, function(a){ return a.substring(1).toUpperCase(); });
+      text = text.replace(/\s/g, "_").replace(/[^-\p{Alphabetic}0-9_]/ug, "");
+      return text.replace(/-./g, function (a) { return a.substring(1).toUpperCase(); });
    }
 
    static offerNameForChain(words) {
@@ -73,22 +73,22 @@ class CommonFunctions {
          result = CommonFunctions.removeDiacritics(words[0]);
       } else {
          var c = 0;
-         for (var i=0; i<words.length && c<7; i++) {
+         for (var i = 0; i < words.length && c < 7; i++) {
             var text = words[i].toLowerCase();
             if (result == '' && text.search(/^(?:l[ea]?|les|une?|d[ue]?|des|cettes?|ces?|[mts](?:on|es|a)|[nv](?:os|otre)|leurs?|aux?)$/i) == -1) {
                result += CommonFunctions.removeDiacritics(text);
                c++;
-            } else if (i>0 && result == '') {
+            } else if (i > 0 && result == '') {
                result += CommonFunctions.removeDiacritics(text);
                c++;
-            } else if (i>0) {
+            } else if (i > 0) {
                text = CommonFunctions.removeDiacritics(text);
-               result += text.substring(0, 1).toUpperCase()+text.substring(1);
+               result += ' ' + text.substring(0, 1).toUpperCase() + text.substring(1);
                c++;
             }
          } // for
       } // if
-      result = result.substring(0, 1).toUpperCase()+result.substring(1);
+      result = result.substring(0, 1).toUpperCase() + result.substring(1);
       return result;
    }
 
@@ -104,7 +104,7 @@ class CommonFunctions {
       if (askUser) {
          if (!defaultName) {
             defaultName = "";
-         } else if (typeof(defaultName) == "string") {
+         } else if (typeof (defaultName) == "string") {
             // nothing
          } else {
             defaultName = CommonFunctions.offerNameForChain(defaultName);
@@ -114,7 +114,8 @@ class CommonFunctions {
             if (name == null) { // cancel
                return undefined;
             }
-            if (!name || !chainColl.checkName(name)) {
+            name = name.replace(/\s/gu, "_").replace(/[^-\p{Alphabetic}0-9_]/gu, "");
+            if (!name) {
                alert("Bad name!");
                name = undefined;
             }
@@ -136,14 +137,14 @@ class CommonFunctions {
    static parseValues(text, startIndex) {
       var result = {};
       if (text.indexOf(':', startIndex) != startIndex) {
-         return {startIndex:startIndex, dic:result};
+         return { startIndex: startIndex, dic: result };
       }
       var textLen = text.length;
       startIndex++;
       var tmp;
-      while(startIndex < textLen) {
+      while (startIndex < textLen) {
          if (((tmp = text.substring(startIndex).match(/^(\w+)=(\w+)/)) != null)
-               || ((tmp = text.substring(startIndex).match(/^(\w+)="((?:\\"|[^"])*)"/)) != null)) {
+            || ((tmp = text.substring(startIndex).match(/^(\w+)="((?:\\"|[^"])*)"/)) != null)) {
             result[tmp[1]] = tmp[2];
             startIndex += tmp[0].length;
             if (text.substring(startIndex).match(/^[,;]/) != null) {
@@ -155,7 +156,7 @@ class CommonFunctions {
             break;
          }
       } // while
-      return {startIndex:startIndex, dic:result};
+      return { startIndex: startIndex, dic: result };
    };
 
 };

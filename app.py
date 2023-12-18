@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask_compress import Compress
 import os
 import json
-from azure.storage.blob import BlobServiceClient, BlobClient
+from azure.storage.blob import BlobServiceClient, BlobClient, ContentSettings
 from urllib.parse import unquote
 from werkzeug.middleware.proxy_fix import ProxyFix
 import requests
@@ -82,7 +82,9 @@ def read_file(filename):
                                  credential=storage_account_key)
         download_stream = blob_client.download_blob()
         file_content = download_stream.readall().decode('utf-8')
-        return jsonify({"content": file_content})
+
+        # Return content as plain text
+        return Response(file_content, mimetype='text/plain')
     except Exception as e:
         return jsonify({"error": str(e)}), 404
 
@@ -91,34 +93,20 @@ def read_file(filename):
 def save_file(filename):
     container_name = "podcasts-coref"
     try:
-        # Decode the URL-encoded filename
         decoded_filename = unquote(filename)
-        content = request.data.decode('utf-8') 
-        content_bytes = content.encode('utf-8')
-        # Logic to save content to the file
-        # Assuming using Azure Blob Storage
-        blob_client = BlobClient(account_url=f"https://{storage_account_name}.blob.core.windows.net", 
+        content = request.get_data(as_text=True)  # Get data as text
+
+        blob_client = BlobClient(account_url=f"https://{storage_account_name}.blob.core.windows.net",
                                  container_name=container_name, 
                                  blob_name=decoded_filename, 
                                  credential=storage_account_key)
-        blob_client.upload_blob(content_bytes, overwrite=True)
+
+        # Upload the content as plain text
+        blob_client.upload_blob(content, overwrite=True, content_settings=ContentSettings(content_type='text/plain'))
 
         return jsonify({"message": "File saved successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-@app.route('/api/getFileContent/<path:filename>')
-def get_file_content(filename):
-    # Logic to fetch and return file content
-    # For example, reading from a file system or database
-    try:
-        # Assuming file is stored in a known directory
-        with open(f'path_to_files/{filename}', 'r') as file:
-            content = file.read()
-        return jsonify({"content": content})
-    except IOError:
-        return jsonify({"error": "File not found"}), 404
 
 
 @app.route('/')

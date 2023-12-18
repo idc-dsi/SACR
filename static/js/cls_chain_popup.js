@@ -66,7 +66,25 @@ class ChainPopup {
       this.body = document.createElement('div');
       document.getElementById('popupContainer').appendChild(this.body);
 
+      var filterContainer = document.createElement('div');
+      filterContainer.id = "popupFilterContainer";
+      this.filterBox = document.createElement("input");
+      this.filterBox.id = "popupFilter";
+      this.filterBox.type = "text";
+      var that = this;
+      this.filterBox.onchange = function (e) {
+         if (e.keyCode === 27)
+            that.filterBox.blur();
+         else
+            that.filter(that.filterBox.value);
+      };
+      this.filterBox.oninput = this.filterBox.onchange;
+      this.filterBox.onkeydown = this.filterBox.onchange;
+      this.filterBox.onpaste = this.filterBox.onchange;
+      filterContainer.appendChild(this.filterBox);
+
       this.body.appendChild(this.h1);
+      this.body.appendChild(filterContainer);
       this.body.appendChild(chainDiv);
    }
 
@@ -78,6 +96,11 @@ class ChainPopup {
    hide() {
       this.visible = false;
       this.body.parentNode.style.display = "none";
+   }
+   filter(pattern) {
+      for (var chain of this.chainDiv.childNodes) {
+         chain.style.display = (chain.innerText.indexOf(pattern) != -1) ? "block" : "none";
+      }
    }
    toggle() {
       if (this.visible)

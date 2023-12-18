@@ -1,10 +1,10 @@
 async function fetchuser() {
-   res = await fetch("static/api/user");
-   if(res.ok) {
+   res = await fetch("/api/user");
+   if (res.ok) {
       u = await res.json();
       return u
    }
-   else if(res.status == 401) {
+   else if (res.status == 401) {
       location.href = "/api/login?next=" + location.href;
    }
    else {
@@ -12,8 +12,8 @@ async function fetchuser() {
    }
 }
 async function fetchdocs() {
-   res = await fetch("static/api/doc");
-   if(res.ok) {
+   res = await fetch("/api/doc");
+   if (res.ok) {
       u = await res.json();
       return u
    }
@@ -21,3 +21,4 @@ async function fetchdocs() {
       throw res.statusText;
    }
 }
+

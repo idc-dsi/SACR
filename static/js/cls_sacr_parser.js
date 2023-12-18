@@ -1,4 +1,4 @@
-/*
+/* vim: sw=3 ts=3 expandtab
  *
  * SACR (Script d'Annotation de Chaînes de Référence): a coreference chain
  * annotation tool.
@@ -54,7 +54,7 @@ class SacrParser {
       text = text.replace(/\n(\s+\n)+/g, "\n\n");
       text = text.replace(/\\n\n/g, "\\n");
       text = text.replace(/\n\s*(#[^\n]+)\n/g, "\n\n$1\n\n");
-      text = text.replace(/([^\n])[ \t]*\n[ \t]*(?!#|\n+)/g, "$1 ");
+      text = text.replace(/([^\n])[ \t]*\n[ \t]*(?=.)(?!#|\n+)/g, "$1 ");
       text = text.replace(/[ \t]*\n\n+[ \t]*/g, "\n");
       text = text.replace(/^\n+/g, "");
       text = text.replace(/\n+$/g, "");
@@ -62,19 +62,20 @@ class SacrParser {
    }
 
    static makeTokenRegex(tokenizationType, additionnalTokens) {
-      additionnalTokens.sort(function(a,b) {
+      additionnalTokens.sort(function (a, b) {
          if (b.length === a.length) { return 0; }
          else if (b.length > a.length) { return 1; }
-         else { return -1; }; });
+         else { return -1; };
+      });
       var additionnalTokenString = additionnalTokens.join('|');
       var tokenization_string = undefined;
       if (tokenizationType == TOKENIZATION_WORD) {
          //alert('tokenization: words');
-         tokenization_string = 
+         tokenization_string =
             "\\p{Alphabetic}+'?|[-+±]?[.,]?[0-9]+";
       } else if (tokenizationType == TOKENIZATION_WORD_N_PUNCT) {
          //alert('tokenization: word and punct');
-         tokenization_string = 
+         tokenization_string =
             "\\p{Alphabetic}+'?|[-+±]?[.,]?[0-9]+"
             + "|[.,;:!?()\\[\\]]|-+";
       } else if (tokenizationType == TOKENIZATION_MANUAL) {
@@ -105,13 +106,14 @@ class SacrParser {
       var parIsHeading = 0;  // 0 = no, 1 = level 1, etc.
       // variables for storing actions for creating links and chains
       var parsedLinks = new Array(); // array of ParsedLink
-         // (see the class ParsedLink for details)
+      // (see the class ParsedLink for details)
       // NOTE: each link found ({name:values text}) is stored in the
       // filoLinks.  When the closing } is encountered, it is popped out from
       // the filoLinks array and stored permanently in the parsedLinks array.
       var filoLinks = new Array(); // array of ParsedLink
       var colors = {};
-         // array of {"chain name":<Color object>]
+      // array of {"chain name":<Color object>]
+      var chainmetadata = {};
 
       // preprocessing
       this.text = SacrParser.normalizeText(this.text);
@@ -132,13 +134,13 @@ class SacrParser {
          if (((tmp = line.match(/^#COLOR\s*:\s*([^ =]+)\s*=\s*(.+)$/)) != null)) {
             var chainName = tmp[1];
             var tmp_color = Color.parseString(tmp[2]); // returns null if
-               // can't parse
+            // can't parse
             if (tmp_color) {
                //console.log("parsed color: "+tmp[2]);
                colors[chainName] = tmp_color;
                //console.log(chainName + ": " + tmp_color.string);
             } else {
-               console.log("can't parse color: "+tmp[2]);
+               console.log("can't parse color: " + tmp[2]);
             }
 
          } else if (((tmp = line.match(/^#DEFAULTCOLOR\s*:\s*(\S+)$/)) != null)) {
@@ -149,8 +151,15 @@ class SacrParser {
          } else if (((tmp = line.match(/^#TOKENIZATION-TYPE/)) != null)) {
             // nothing
 
+         } else if (((tmp = line.match(/^#chainmetadata:([^ :]+)/)) != null)) {
+            var chainName = tmp[1];
+            var response = CommonFunctions.parseValues(line, tmp[0].length);
+            if (response.startIndex != line.length) {
+               throw "Can't parse line: " + line + " (error when reading option values)";
+            }
+            chainmetadata[chainName] = response.dic;
          } else if (((tmp = line.match(/^#.*$/)) != null)
-               || ((tmp = line.match(/^\*+$/)) != null)) {
+            || ((tmp = line.match(/^\*+$/)) != null)) {
             var par = document.createElement('P');
             if (line.match(/^\*+$/)) {
                var hiddenSpan = document.createElement('SPAN');
@@ -170,17 +179,17 @@ class SacrParser {
                      additionnalTokens);
                } else if ((tmp2 = line.match(/^\s*#textmetadata\s*:\s*finished\s*=\s*(.+)$/)) != null) {
                   this.div.finished = par;
-		  if(tmp2[1] == "Yes")
-		    this.div.classList.add("finished");
-		  var btn = document.createElement("button");
-		  btn.innerText = "✓";
-		  btn.onclick = function(e) { gText.toggleFinished(); e.target.blur(); };
-		  if(tmp2[1] == "Yes")
-		     btn.style.color = "green";
-		  else
-		     btn.style.color = "black";
-		  par.appendChild(btn);
-	       }
+                  if (tmp2[1] == "Yes")
+                     this.div.classList.add("finished");
+                  var btn = document.createElement("button");
+                  btn.innerText = "✓";
+                  btn.onclick = function (e) { gText.toggleFinished(); e.target.blur(); };
+                  if (tmp2[1] == "Yes")
+                     btn.style.color = "green";
+                  else
+                     btn.style.color = "black";
+                  par.appendChild(btn);
+               }
                par.appendChild(document.createTextNode(tmp[0]));
             }
             par.className = CLASS_SAVED;
@@ -188,7 +197,7 @@ class SacrParser {
             if (((tmp = line.match(/^#part-heading:/)) != null)) {
                var response = CommonFunctions.parseValues(line, 13);
                if (response.startIndex != line.length) {
-                  throw "Can't parse line: "+line+" (error when reading option values)";
+                  throw "Can't parse line: " + line + " (error when reading option values)";
                }
                parIsHeading = 1;
                if ('level' in response.dic) {
@@ -206,16 +215,16 @@ class SacrParser {
             par.className = CLASS_PARAGRAPH;
             if (parIsHeading) {
                par.classList.add(CLASS_HEADING);
-               par.classList.add("level"+parIsHeading);
+               par.classList.add("level" + parIsHeading);
             }
             var par_number = document.createElement('SPAN');
             par_number.className = CLASS_PAR_NUMBER;
-            par_number.appendChild(document.createTextNode('[#'+paragraph_counter+'] '));
+            par_number.appendChild(document.createTextNode('[#' + paragraph_counter + '] '));
             paragraph_counter++;
             par.appendChild(par_number);
             parIsHeading = 0;
             this.div.appendChild(par);
-            while(startIndex < textLen) {
+            while (startIndex < textLen) {
                if ((tmp = line.substring(startIndex).match(tokenRegex)) != null) {
                   var anchor = gText.createTokenAnchor(tmp[0]);
                   // WARNING!!! sometimes, there are consecutive
@@ -235,10 +244,10 @@ class SacrParser {
                   thereIsSomeText = true;
                } else if ((tmp = line.substring(startIndex).match(/^{([^:} ]+)/)) != null) {
                   var chainName = tmp[1];
-                  var response = CommonFunctions.parseValues(line, startIndex+chainName.length+1);
+                  var response = CommonFunctions.parseValues(line, startIndex + chainName.length + 1);
                   startIndex = response.startIndex;
                   if (line.substring(startIndex).search(/^\s/) != 0) {
-                     throw "Can't parse line: "+line+" (error when reading property values).";
+                     throw "Can't parse line: " + line + " (error when reading property values).";
                   }
                   var parsedLink = new ParsedLink(chainName);
                   parsedLink.properties = response.dic;
@@ -254,7 +263,7 @@ class SacrParser {
                      if (filoLinks.length == 0 || !lastAnchor) {
                         throw "Syntax error in the file (too much }'s).";
                      }
-                     filoLinks[filoLinks.length-1].endAnchor = lastAnchor;
+                     filoLinks[filoLinks.length - 1].endAnchor = lastAnchor;
                      parsedLinks.push(filoLinks.pop());
                   }
                   startIndex++;
@@ -263,7 +272,7 @@ class SacrParser {
                   par.appendChild(document.createElement('BR'));
                   startIndex += 2;
                } else if ((tmp = line.substring(startIndex).match(/^./)) != null) {
-                  if(tmp[0] != "​")
+                  if (tmp[0] != "​")
                      par.appendChild(document.createTextNode(tmp[0]));
                   startIndex++;
                   lastTokenType = 'symbol';
@@ -279,7 +288,7 @@ class SacrParser {
             par.normalize();
 
          } else {
-            throw "Can't parse line: "+line;
+            throw "Can't parse line: " + line;
 
          }
 
@@ -288,11 +297,11 @@ class SacrParser {
       // set the document title
       try {
          if (textId && textTitle) {
-            document.title = "SACR: "+textId+", "+textTitle;
+            document.title = "SACR: " + textId + ", " + textTitle;
          } else if (textId) {
-            document.title = "SACR: "+textId;
+            document.title = "SACR: " + textId;
          } else if (textTitle) {
-            document.title = "SACR: "+textTitle;
+            document.title = "SACR: " + textTitle;
          }
       } catch (err) {
          // buuuuh!
@@ -314,7 +323,7 @@ class SacrParser {
          //console.log('color: '+color.string);
          //console.log('exists: '+gText.colorManager.doesThisColorExist(color).toString());
          if (gText.colorManager.doesThisColorExist(color) &&
-               gText.colorManager.isThisColorFree(color,
+            gText.colorManager.isThisColorFree(color,
                gText.chainColl.chains)) {
             var chain = gText.chainColl.getChainByName(chainName);
             if (chain && chain.isTrueChain) {
@@ -322,6 +331,9 @@ class SacrParser {
                //console.log('set color:'+color.string);
             }
          }
+      }
+      for (var chain of gText.chainColl.chains) {
+         chain.metadata = gText.schema.buildChainProperties(chainmetadata[chain.name]);
       }
 
    }

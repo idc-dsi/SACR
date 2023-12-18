@@ -335,7 +335,6 @@ class DataLoader {
          if (!textareaText.value) {
             alert("No text!");
          } else {
-            document.getElementById('title').style.display = 'none';
             // check if there is a tokenization type defined in the metadata
             // of the texte
             var tmp;
@@ -408,4 +407,5 @@ class DataLoader {
       return dataLoader;
    }
 }
+
 

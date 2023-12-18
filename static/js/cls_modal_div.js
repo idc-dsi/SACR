@@ -55,7 +55,7 @@ class ModalDiv {
          cancelButton.style.right = "20px";
          cancelButton.style.top = "20px";
          var that = this;
-         cancelButton.onclick = function() {
+         cancelButton.onclick = function () {
             that.isCancelled = true;
             that.close();
          }

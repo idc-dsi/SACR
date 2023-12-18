@@ -131,27 +131,27 @@ class Scrolling {
    }
 
 
-/*
-   // need to scroll to the link only if it is not in the top half
-   // part of the windows
-   function isScrollNeeded(pos) {
-      var minAllowedPos = window.scrollY;
-      var maxAllowedPos;
-      var divControlsHeight;
-      if (divControlsHeight = gCommonFunctions.getDivControlsHeight()) {
-         //console.log("using control panel height, which is: " + divControlsHeight);
-         maxAllowedPos = minAllowedPos + window.innerHeight - divControlsHeight;
-      } else {
-         maxAllowedPos = minAllowedPos + (window.innerHeight/2);
+   /*
+      // need to scroll to the link only if it is not in the top half
+      // part of the windows
+      function isScrollNeeded(pos) {
+         var minAllowedPos = window.scrollY;
+         var maxAllowedPos;
+         var divControlsHeight;
+         if (divControlsHeight = gCommonFunctions.getDivControlsHeight()) {
+            //console.log("using control panel height, which is: " + divControlsHeight);
+            maxAllowedPos = minAllowedPos + window.innerHeight - divControlsHeight;
+         } else {
+            maxAllowedPos = minAllowedPos + (window.innerHeight/2);
+         }
+         //console.log("windows inner height is: "+window.innerHeight);
+         //console.log("element position is: "+pos);
+         //console.log("min allowed pos: "+ minAllowedPos);
+         //console.log("max allowed pos: "+ maxAllowedPos);
+         var estimatedLineHeight = 250;
+         return (!(minAllowedPos <= pos && (pos + estimatedLineHeight) <= maxAllowedPos));
       }
-      //console.log("windows inner height is: "+window.innerHeight);
-      //console.log("element position is: "+pos);
-      //console.log("min allowed pos: "+ minAllowedPos);
-      //console.log("max allowed pos: "+ maxAllowedPos);
-      var estimatedLineHeight = 250;
-      return (!(minAllowedPos <= pos && (pos + estimatedLineHeight) <= maxAllowedPos));
-   }
-*/
+   */
 
 
 

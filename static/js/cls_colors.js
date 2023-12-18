@@ -24,9 +24,9 @@
 class ColorBuilder {
 
    static computeNbOfColors(hueStep, saturationStep, lightnessStep) {
-      var hue = Math.ceil(360/hueStep);
-      var saturation = Math.ceil(100/saturationStep);
-      var lightness = Math.ceil(70/lightnessStep); // because ]10;80]
+      var hue = Math.ceil(360 / hueStep);
+      var saturation = Math.ceil(100 / saturationStep);
+      var lightness = Math.ceil(70 / lightnessStep); // because ]10;80]
       var nb = hue * saturation * lightness;
       //var count = 0;
       //for (var s=100; s>0; s-=saturationStep) {
@@ -56,14 +56,14 @@ class ColorBuilder {
       //saturationStep = 100;
       //lightnessStep = 100;
       var colors = [];
-      for (var s=100; s>0; s-=saturationStep) {
-         for (var l=80; l>10; l-=lightnessStep) {
-            for (var h=0; h<360; h+=hueStep) {
+      for (var s = 100; s > 0; s -= saturationStep) {
+         for (var l = 80; l > 10; l -= lightnessStep) {
+            for (var h = 0; h < 360; h += hueStep) {
                colors.push(new Color(h, s, l));
             }
          }
       }
-      console.log("number of colors: "+colors.length.toString());
+      console.log("number of colors: " + colors.length.toString());
       return colors;
    }
 
@@ -74,27 +74,27 @@ class ColorBuilder {
 class Color {
 
    static rgb2yuv(rgb) {
-      var y = Color.clamp(rgb.r *  0.29900 + rgb.g *  0.587   + rgb.b * 0.114);
+      var y = Color.clamp(rgb.r * 0.29900 + rgb.g * 0.587 + rgb.b * 0.114);
       var u = Color.clamp(rgb.r * -0.16874 + rgb.g * -0.33126 + rgb.b * 0.50000 + 128);
-      var v = Color.clamp(rgb.r *  0.50000 + rgb.g * -0.41869 + rgb.b * -0.08131 + 128);
-      return {y:y, u:u, v:v};
+      var v = Color.clamp(rgb.r * 0.50000 + rgb.g * -0.41869 + rgb.b * -0.08131 + 128);
+      return { y: y, u: u, v: v };
    }
 
-   static clamp(n){
-      if (n<0) { return 0;}
-      if (n>255) { return 255;}
+   static clamp(n) {
+      if (n < 0) { return 0; }
+      if (n > 255) { return 255; }
       return Math.floor(n);
    }
 
 
-   static yuv2rgb(yuv){
+   static yuv2rgb(yuv) {
       var y = yuv.y;
       var u = yuv.u;
       var v = yuv.v;
-      var r = Color.clamp(y + (v - 128) *  1.40200);
+      var r = Color.clamp(y + (v - 128) * 1.40200);
       var g = Color.clamp(y + (u - 128) * -0.34414 + (v - 128) * -0.71414);
-      var b = Color.clamp(y + (u - 128) *  1.77200);
-      return {r:r,g:g,b:b};
+      var b = Color.clamp(y + (u - 128) * 1.77200);
+      return { r: r, g: g, b: b };
    }
 
    /**
@@ -104,28 +104,30 @@ class Color {
    */
    static hsl2rgb(h, s, l) {
       var r, g, b;
-      h = h/360;
-      s = s/100;
-      l = l/100;
-      if(s == 0){
-          r = g = b = l; // achromatic
-      }else{
-          var hue2rgb = function hue2rgb(p, q, t){
-              if(t < 0) t += 1;
-              if(t > 1) t -= 1;
-              if(t < 1/6) return p + (q - p) * 6 * t;
-              if(t < 1/2) return q;
-              if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-              return p;
-          }
-          var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-          var p = 2 * l - q;
-          r = hue2rgb(p, q, h + 1/3);
-          g = hue2rgb(p, q, h);
-          b = hue2rgb(p, q, h - 1/3);
+      h = h / 360;
+      s = s / 100;
+      l = l / 100;
+      if (s == 0) {
+         r = g = b = l; // achromatic
+      } else {
+         var hue2rgb = function hue2rgb(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+         }
+         var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+         var p = 2 * l - q;
+         r = hue2rgb(p, q, h + 1 / 3);
+         g = hue2rgb(p, q, h);
+         b = hue2rgb(p, q, h - 1 / 3);
       }
-      return {r:Math.round(r * 255),
-         g:Math.round(g * 255), b:Math.round(b * 255)};
+      return {
+         r: Math.round(r * 255),
+         g: Math.round(g * 255), b: Math.round(b * 255)
+      };
    }
 
    // adapted from https://stackoverflow.com/questions/9600295/automatically-change-text-color-to-assure-readability
@@ -150,12 +152,12 @@ class Color {
       this.h = h;
       this.s = s;
       this.l = l;
-      this._string = "hsl("+h+", "+s+"%, "+l+"%)";
+      this._string = "hsl(" + h + ", " + s + "%, " + l + "%)";
       var rgb = Color.hsl2rgb(h, s, l);
-      this._transparentString = 'rgba('+rgb.r+','+rgb.g+','+rgb.b+',0.4)';
+      this._transparentString = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.4)';
       var invertedRgb = Color.invertColor(rgb);
-      this._invertedString = "rgb("+invertedRgb.r+","+invertedRgb.g+","
-         +invertedRgb.b+")";
+      this._invertedString = "rgb(" + invertedRgb.r + "," + invertedRgb.g + ","
+         + invertedRgb.b + ")";
    }
 
    get string() {
@@ -226,10 +228,10 @@ class ColorManager {
             return color;
          }
       }
-      if(!window.colorAlert) {
+      if (!window.colorAlert) {
          alert("There is no more color available.  Try to export your "
-            +"annotations, reload the script and define more color on the start "
-            +"page.  In the meantime, I'm using default color (gray).");
+            + "annotations, reload the script and define more color on the start "
+            + "page.  In the meantime, I'm using default color (gray).");
          window.colorAlert = true;
       }
       return ColorManager.getDefaultColor(); // if there is no more color
@@ -238,12 +240,12 @@ class ColorManager {
    getAvailableColors(chains) {
       var that = this;
       return this.colors.filter(
-         function(c) { return that.isThisColorFree(c, chains); });
+         function (c) { return that.isThisColorFree(c, chains); });
    }
 
    changeDefaultColor(chains) {
       var colors = this.getAvailableColors(chains);
-      var chooser = new ColorChooserDialog(colors, function(color) {
+      var chooser = new ColorChooserDialog(colors, function (color) {
          _defaultColor = color;
          // TODO redraw links and link list
       });
@@ -251,7 +253,7 @@ class ColorManager {
 
    changeChainColor(chain, chains) {
       var colors = this.getAvailableColors(chains);
-      var chooser = new ColorChooserDialog(colors, function(color) {
+      var chooser = new ColorChooserDialog(colors, function (color) {
          chain.color = color;
          // TODO redraw links and link list
       });
@@ -276,7 +278,7 @@ class ColorChooserDialog {
          var anchor = document.createElement("anchor");
          anchor.style.cursor = "pointer";
          anchor.color = color;
-         anchor.onclick = function(e) {
+         anchor.onclick = function (e) {
             that.callback(this.color);
             that.modalDiv.close();
          };

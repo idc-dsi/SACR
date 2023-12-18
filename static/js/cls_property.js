@@ -29,21 +29,21 @@ class Schema {
 
    constructor(code) {
       this.isEmpty = true;
-      this._rawProperties = {}; // name:{dic found in the code}
+      this._rawProperties = { 'link': {}, 'chain': {} }; // name:{dic found in the code}
       this._parse(code);
       this.listOfProperties = {}; // name:{type:"TYPE", values:[VALUES]}
-         // (values is empty for textbox and head)
+      // (values is empty for textbox and head)
       this.editMode = EDIT_NORMAL;
       this.editInChain = false;
       this.editOnlyVisible = false;
       this._button = null;
       var that = this;
       this._editModeDialog = new EditModeDialog(
-         function(editMode, inChain, onlyVisible) {
+         function (editMode, inChain, onlyVisible) {
             that.editMode = editMode;
             that.editInChain = inChain;
             that.editOnlyVisible = onlyVisible;
-      });
+         });
    }
 
    _parse(text) {
@@ -59,8 +59,19 @@ class Schema {
             }
             var response = CommonFunctions.parseValues(line, 4);
             if (response.startIndex != line.length) {
-               alert("Can't parse line: "+line+" (error when reading option values)");
+               alert("Can't parse line: " + line + " (error when reading option values)");
             }
+            response.dic.coreflevel = 'link';
+            cur = response.dic;
+         } else if (((tmp = line.match(/^CHAINPROP:/)) != null)) {
+            if (cur) {
+               this.addPrototypeProperty(cur);
+            }
+            var response = CommonFunctions.parseValues(line, 9);
+            if (response.startIndex != line.length) {
+               alert("Can't parse line: " + line + " (error when reading option values)");
+            }
+            response.dic.coreflevel = 'chain';
             cur = response.dic;
          } else if (((tmp = line.match(/^\s*(.+)$/)) != null)) {
             if (cur) {
@@ -69,10 +80,10 @@ class Schema {
                }
                cur.values.push(tmp[1] == '$$$' ? '' : tmp[1]);
             } else {
-               alert("Can't parse line: "+line);
+               alert("Can't parse line: " + line);
             }
          } else {
-            alert("Can't parse line: "+line);
+            alert("Can't parse line: " + line);
          }
       } // for
       if (cur) {
@@ -82,7 +93,7 @@ class Schema {
 
    addPrototypeProperty(dic) {
       if ('name' in dic) {
-         this._rawProperties[dic['name']] = dic;
+         this._rawProperties[dic['coreflevel']][dic['name']] = dic;
          this.isEmpty = false;
          //console.log(dic)
       } else {
@@ -96,17 +107,17 @@ class Schema {
     */
    buildLinkProperties(givenValues) {
       var properties = [];
-      for (var name in this._rawProperties) {
+      for (var name in this._rawProperties['link']) {
          this.listOfProperties[name] = {};
          this.listOfProperties[name]['type'] = 'normal'; // default
          this.listOfProperties[name]['values'] = {}; // default
-         var setup = this._rawProperties[name];
+         var setup = this._rawProperties['link'][name];
          var initialValue = "";
          if (name in givenValues) {
             initialValue = givenValues[name];
          } else if (gText.showPropertyWarnings
-               && Object.keys(givenValues).length) {
-            alert("Property `"+name+"' not found in the file.");
+            && Object.keys(givenValues).length) {
+            alert("Property `" + name + "' not found in the file.");
          }
          var prop = new LinkProperty(name, initialValue);
          if ('newline' in setup)
@@ -129,12 +140,61 @@ class Schema {
       }
       if (gText.showPropertyWarnings) {
          for (var name in givenValues) {
-            if (!(name in this._rawProperties)) {
-                  alert("Property `"+name+"' found in the file, but not in the schema.");
+            if (!(name in this._rawProperties['link'])) {
+               alert("Property `" + name + "' found in the file, but not in the schema.");
             }
          }
       }
-      return new LinkProperties(properties);
+      return new LinkProperties(properties, "mention");
+   }
+
+   /* @param givenValues: A dictionary (keys are property names (like
+    * `gramfunction'), values are property values (like `subject')).  Give an
+    * empty dictionary to get a default property list.
+    */
+   buildChainProperties(givenValues) {
+      if (!givenValues)
+         givenValues = {};
+      var properties = [];
+      for (var name in this._rawProperties['chain']) {
+         this.listOfProperties[name] = {};
+         this.listOfProperties[name]['type'] = 'normal'; // default
+         this.listOfProperties[name]['values'] = {}; // default
+         var setup = this._rawProperties['chain'][name];
+         var initialValue = "";
+         if (name in givenValues) {
+            initialValue = givenValues[name];
+         } else if (gText.showPropertyWarnings
+            && Object.keys(givenValues).length) {
+            alert("Property `" + name + "' not found in the file.");
+         }
+         var prop = new LinkProperty(name, initialValue);
+         if ('newline' in setup)
+            prop.newLineBefore = (setup['newline'] == 'true');
+         if ('showname' in setup)
+            prop.showName = (setup['showname'] == 'true');
+         if ('textboxsize' in setup)
+            prop.textboxSize = setup['textboxsize'];
+         if ('type' in setup) {
+            prop.type = setup['type'];
+            this.listOfProperties[name]['type'] = prop.type;
+         }
+         if ('values' in setup) {
+            prop.values = setup['values'];
+            this.listOfProperties[name]['values'] = prop.values;
+         }
+         if ('addShortcuts' in setup)
+            prop.addShortcuts = setup['addShortcuts'];
+         properties.push(prop);
+      }
+      if (gText.showPropertyWarnings) {
+         for (var name in givenValues) {
+            if (!(name in this._rawProperties['chain'])) {
+               alert("Property `" + name + "' found in the file, but not in the schema.");
+            }
+         }
+      }
+      return new LinkProperties(properties, "chain");
    }
 
    get button() {
@@ -143,7 +203,7 @@ class Schema {
          this._button.type = 'BUTTON';
          this._button.value = 'Edit Mode';
          var that = this;
-         this._button.onclick = function() {
+         this._button.onclick = function () {
             that._editModeDialog.show();
          };
       }
@@ -155,9 +215,12 @@ class Schema {
 
 class LinkProperties {
 
-   constructor(properties) {
+   constructor(properties, klass) {
+      if (!klass)
+         klass = "mention";
       this.properties = properties;
       this.div = document.createElement('DIV');
+      this.div.classList.add(klass);
       for (var property of properties) {
          if (property.newLineBefore) {
             this.div.appendChild(document.createElement("BR"));
@@ -165,7 +228,7 @@ class LinkProperties {
             this.div.appendChild(document.createTextNode(" "));
          }
          if (property.showName) {
-            this.div.appendChild(document.createTextNode(property.name+": "));
+            this.div.appendChild(document.createTextNode(property.name + ": "));
          }
          this.div.appendChild(property.element);
       }
@@ -211,7 +274,7 @@ class LinkProperties {
    }
 
    copyPropertiesFrom(properties) {
-      for (var i=0; i<this.properties.length; i++) {
+      for (var i = 0; i < this.properties.length; i++) {
          //properties.properties[i].setValue(this.properties[i].value);
          this.properties[i].setValue(properties.properties[i].value);
          // note: properties is an instance of LinkProperties, so the array is
@@ -284,7 +347,7 @@ class LinkProperty {
             }
          }
          if (!found) {
-            alert("can't find the value: `"+value+"'");
+            alert("can't find the value: `" + value + "'");
          }
       } else if (this.type == 'head') {
          // don't change the value
@@ -310,7 +373,7 @@ class LinkProperty {
             option.value = choice;
             if (this.addShortcuts) {
                if (option.value) {
-                  option.text = String.fromCharCode(counter++)+" "+option.value;
+                  option.text = String.fromCharCode(counter++) + " " + option.value;
                } else {
                   option.text = option.value;
                }
@@ -325,7 +388,7 @@ class LinkProperty {
          }
          if (gText.showPropertyWarnings) {
             if (this.values.indexOf(this.initialValue) == -1) {
-               alert("Unknown property value `"+this.initialValue+"'.");
+               alert("Unknown property value `" + this.initialValue + "'.");
             }
          }
       } else if (this.type == 'head') {
@@ -343,14 +406,14 @@ class LinkProperty {
             this._element.size = size;
          }
       } else {
-         alert("Unknown property type: "+this.type+".");
+         alert("Unknown property type: " + this.type + ".");
       }
       return this._element;
    }
 
    addComboEvents(control) {
       var that = this;
-      control.onchange = function(e) {
+      control.onchange = function (e) {
          if (gText.schema.editMode == EDIT_AUTO) {
             if (gText.schema.editInChain) {
                gText.selectNextLinkInChain(false, gText.schema.editOnlyVisible,
@@ -363,9 +426,9 @@ class LinkProperty {
          gText.markChanged();
       }
       // onkeypress is used for tab, and tab only
-      control.onkeypress = function(e) {
+      control.onkeypress = function (e) {
          if (gText.schema.editMode == EDIT_AUTO
-               || gText.schema.editMode == EDIT_TAB) {
+            || gText.schema.editMode == EDIT_TAB) {
             if (e.keyCode == 9 && e.shiftKey) { // backward tab
                if (gText.schema.editInChain) {
                   gText.selectNextLinkInChain(true,
@@ -385,7 +448,7 @@ class LinkProperty {
             }
          }
       };
-      control.onkeydown = function(e) {
+      control.onkeydown = function (e) {
          if (e.keyCode == 52 && e.shiftKey) { // $
             if (this.tagName == "SELECT") {
                for (var option of this.options) {
@@ -410,16 +473,16 @@ class LinkProperty {
       }
       // onkeyup is used for key other then tab: don't do that
       // in onkeypress, otherwise the selection is not saved!
-      control.onkeyup = function(e) {
+      control.onkeyup = function (e) {
          // nothing
       };
    }
 
    addTextboxEvents(control) {
       var that = this;
-      control.onkeypress = function(e) {
+      control.onkeypress = function (e) {
          if (gText.schema.editMode == EDIT_AUTO
-               || gText.schema.editMode == EDIT_TAB) {
+            || gText.schema.editMode == EDIT_TAB) {
             if (e.keyCode == 9 && e.shiftKey) { // backward tab
                if (gText.schema.editInChain) {
                   gText.selectNextLinkInChain(true,
@@ -456,12 +519,12 @@ class LinkProperty {
       this.element.add(option); // and NOT this._element !
       option.selected = true;
       // other
-      for (var i=0; i<words.length; i++) {
+      for (var i = 0; i < words.length; i++) {
          var option = document.createElement('OPTION');
          this.values.push(i.toString());
          option.value = i.toString();
          option.word = words[i];
-         option.text = i.toString()+": "+words[i];
+         option.text = i.toString() + ": " + words[i];
          this.element.add(option); // and NOT this._element !
          if (this.initialValue == option.value) {
             option.selected = true;
@@ -495,7 +558,7 @@ class SearchDialog {
       matchPar.style.display = "none";
       div.appendChild(matchPar);
       // checkbox
-      checkUseRegex.onchange = function(e) {
+      checkUseRegex.onchange = function (e) {
          if (this.checked) {
             equalPar.style.display = "none";
             matchPar.style.display = "block";
@@ -526,12 +589,12 @@ class SearchDialog {
       }
       var equalValue = document.createElement('select');
       equalPar.appendChild(equalValue);
-      equalProperty.onchange = function(e) {
+      equalProperty.onchange = function (e) {
          var propName = this.options.item(this.selectedIndex).value;
          var values = schema.listOfProperties[propName]['values'];
-         while (equalValue.options.length > 0) {                
+         while (equalValue.options.length > 0) {
             equalValue.remove(0);
-         } 
+         }
          for (var value of values) {
             var option = document.createElement('option');
             option.value = value;
@@ -567,7 +630,7 @@ class SearchDialog {
       button.type = "button";
       button.value = "search";
       buttonPar.appendChild(button);
-      buttonPar.onclick = function(e) {
+      buttonPar.onclick = function (e) {
          var name, searchedValue, reversed;
          if (checkUseRegex.checked) {
             name = matchProperty.options.item(matchProperty.selectedIndex).value;
@@ -583,7 +646,7 @@ class SearchDialog {
             }
             try {
                searchedValue = new RegExp(value);
-            } catch(err) {
+            } catch (err) {
                searchedValue = null;
                alert("Invalid regular expression.");
             }
@@ -600,8 +663,8 @@ class SearchDialog {
          }
          if (searchedValue !== null) { // see the try/catch above
             that.callback(name, searchedValue, reversed); // if searchedValue
-               // is a string, it will be used with an `equal to' function,
-               // otherwise with a regex function
+            // is a string, it will be used with an `equal to' function,
+            // otherwise with a regex function
             that.modalDiv.close();
          }
       };
@@ -633,7 +696,7 @@ class EditModeDialog {
          "tab-mode: use tab on a property control to go to the next link",
          "auto-mode: setting a property automatically put you on the next link"];
       var first = true;
-      for (var i=0; i<modes.length; i++) {
+      for (var i = 0; i < modes.length; i++) {
          var option = document.createElement('option');
          option.value = i.toString();
          option.text = modes[i];
@@ -663,7 +726,7 @@ class EditModeDialog {
       button.type = "button";
       button.value = "save";
       buttonPar.appendChild(button);
-      buttonPar.onclick = function(e) {
+      buttonPar.onclick = function (e) {
          var editMode, inChain, onlyVisible;
          editMode = comboEditMode.options.item(comboEditMode.selectedIndex).value;
          inChain = checkInChain.checked;
