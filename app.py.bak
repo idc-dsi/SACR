@@ -95,13 +95,7 @@ def save_file(filename):
     try:
         decoded_filename = unquote(filename)
         content = request.get_data(as_text=True)  # Get data as text
-        
-        # Remove Zero Width Space characters(formatting overhead)
-        content = content.replace(u"\u200B", "")
-        
-        # Remove non-breaking space characters
-        content = content.replace(u"\u00A0", " ")
-        
+
         blob_client = BlobClient(account_url=f"https://{storage_account_name}.blob.core.windows.net",
                                  container_name=container_name, 
                                  blob_name=decoded_filename, 
@@ -125,7 +119,6 @@ def index():
 def login():
     callback_url = url_for('authorized', _external=True, _scheme='https')
     return azure.authorize(callback=callback_url)
-    #Localhost
     #return azure.authorize(url_for('authorized', _external=True))
 
 
