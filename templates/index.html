@@ -453,7 +453,8 @@ The source code can be found at boberle.com.
           } else {
             gText.chainColl.expandAllChainsInPopup()
           }
-        } else if (e.keyCode == 87) {
+
+        }else if (e.keyCode == 87) {
           // w = export
           if (e.shiftKey && currentFilePath && gText) {
             saveCurrentFile(currentFilePath, new Exporter().computeText(true))
@@ -475,8 +476,8 @@ The source code can be found at boberle.com.
             new Exporter().exportSchema()
           }
         } else if (e.keyCode == 83 && !e.shiftKey) {
-          // s = search
-          gText.search()
+          // s = export formatted text
+            new Exporter().exportText(complete = true ,isEXport = true)
         } else if (e.keyCode == 85) {
           // u = hide non true chains
           if (e.shiftKey) {

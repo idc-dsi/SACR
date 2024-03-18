@@ -152,13 +152,71 @@ class Exporter {
       return result.replaceAll(/​}/g, "}​").replaceAll(/​(\s)/g, "$1");
    }
 
-   convertDomToString(complete) {
+
+   exportElementToText(element, complete) {
+      var result = '';
+      for (var e of element.childNodes) {
+         if (e.nodeType == 3) { // text
+            result += e.textContent;
+         } else if (e.nodeType == 1) { // DOM element
+            if (e.tagName == 'SPAN') {
+               if (e.classList.contains(CLASS_PAR_NUMBER)) {
+                  // nothing
+               } else if (e.classList.contains(CLASS_METADATA)) {
+                  var link = gText.chainColl.getLinkBySpan(e.parentElement);
+                  if (!link) {
+                     alert("One of the link span is not in the dictionary");
+                  } else {
+                     result += "COREF ID: \"" + link.name + "\"" + ">";
+                     if (!gText.schema.isEmpty) {
+                        try {
+                           if (complete) {
+                              result += ':' + link.properties.getString(true,
+                                 link.text);
+                           } else {
+                              result += ':' + link.properties.getString();
+                           }
+                        }
+                        catch (e) {
+                           alert("Error serializing link " + link.name + ": " + e);
+                           throw ("Error serializing link " + link.name + ": " + e);
+                        }
+                     }
+                     result += ' ';
+                  }
+               } else if (e.classList.contains(CLASS_LINK)) {
+                  result += ' <' + this.exportElementToText(e, complete) + '</COREF>';
+               } else {
+                  alert("Found a 'span' which is neither a link nor a metadata (className: '" + elements[i].className + "')...");
+               }
+            } else if (e.tagName == 'A') {
+               result += e.textContent + "​";
+            } else if (e.tagName == 'BR') {
+               //alert('before:\"'+result+"\"");
+               result += "\\n\n";
+               //alert('after:\"'+result+"\"");
+            } else {
+               alert("Found a <" + e.tagName + ">...");
+            }
+         } else {
+            alert("Found a element of node type: " + e.nodeType + "...");
+         }
+      }
+      return result.replaceAll(/​}/g, "}​").replaceAll(/​(\s)/g, "$1");
+   }
+
+   convertDomToString(complete, isExport = false) {
       var result = '';
       for (var par of gText.div.childNodes) {
          if (par.tagName == 'P') {
             if (par.classList.contains(CLASS_PARAGRAPH)) {
-               result += this.convertElementToText(par, complete)
-                  + "\n\n";
+               if (isExport) {
+                  result += this.exportElementToText(par, complete)
+                     + "\n\n";
+               } else {
+                  result += this.convertElementToText(par, complete)
+                     + "\n\n";
+               }
             } else if (par.classList.contains(CLASS_COMMENT)) {
                result += Array.prototype.filter.call(par.childNodes, (e) => e.nodeType == 3).map((e) => e.textContent).join("") + "\n\n";
             } else {
@@ -195,9 +253,9 @@ class Exporter {
    }
 
 
-   computeText(complete) {
+   computeText(complete, isExport = false) {
       var result = "";
-      result += this.convertDomToString(complete);
+      result += this.convertDomToString(complete, isExport);
       result += "\n\n" + this.getColors() + "\n";
       result += this.getMetadata() + "\n";
       result += this.getTokenizationType() + "\n";
@@ -281,9 +339,9 @@ class Exporter {
       return gText.raw_schema;
    }
 
-   exportText(complete) {
+   exportText(complete, isExport = false) {
       var filename = Exporter.computeNewFilename(gText.textFilename);
-      var text = this.computeText(complete);
+      var text = this.computeText(complete, isExport);
       Exporter.writeToFile(text, filename);
    }
 
