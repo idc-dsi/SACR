@@ -398,8 +398,8 @@ class DataLoader {
          "tokenizationType": TOKENIZATION_CHARACTER,
          "text": text,
          "schema": schema,
-         "hueStep": 25,
-         "saturationStep": 25,
+         "hueStep": 15,
+         "saturationStep": 15,
          "lightnessStep": 10,
          "minLinks": 2,
          "textFilename": filename
