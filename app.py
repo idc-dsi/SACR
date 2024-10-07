@@ -9,15 +9,17 @@ from urllib.parse import unquote
 from werkzeug.middleware.proxy_fix import ProxyFix
 import requests
 import jwt
+from dotenv import load_dotenv
 
-
-
+# Load environment variables from .env file
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 
 # Flask App Initialization
 app = Flask(__name__)
 Compress(app)
-app.secret_key = 'My_Secret_Key'  # Replace with your actual secret key
+app.secret_key = os.getenv('FLASK_SECRET_KEY')
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 CORS(app)
 
@@ -26,20 +28,20 @@ CORS(app)
 oauth = OAuth(app)
 azure = oauth.remote_app(
     'azure',
-    consumer_key='0c9d2e09-08a6-4bfe-98f2-85bb2040e8b2',  # Replace with your Azure AD Application ID
-    consumer_secret='3248Q~4ei0YVj7PEu0mElx0Qpb_nGkPv3UiXJa3t',  # Replace with your Azure AD Client Secret
+    consumer_key=os.getenv('AZURE_CLIENT_ID', 'your_client_id'),  # Replace with your Azure AD Application ID
+    consumer_secret=os.getenv('AZURE_CLIENT_SECRET', 'your_client_secret'),  # Replace with your Azure AD Client Secret
     request_token_params={'scope': 'openid email profile'},
     base_url='https://graph.microsoft.com/v1.0/',
     request_token_url=None,
     access_token_method='POST',
-    access_token_url='https://login.microsoftonline.com/bd717aa1-6670-4ce3-ba94-ef01de50c477/oauth2/v2.0/token',  # Replace TENANT_ID
-    authorize_url='https://login.microsoftonline.com/bd717aa1-6670-4ce3-ba94-ef01de50c477/oauth2/v2.0/authorize'  # Replace TENANT_ID
+    access_token_url=f"https://login.microsoftonline.com/{os.getenv('AZURE_TENANT_ID', 'your_tenant_id')}/oauth2/v2.0/token",  # Replace TENANT_ID
+    authorize_url=f"https://login.microsoftonline.com/{os.getenv('AZURE_TENANT_ID', 'your_tenant_id')}/oauth2/v2.0/authorize"  # Replace TENANT_ID
 )
 
 
 # Azure Blob Storage Setup
-storage_account_name = os.getenv('AZURE_STORAGE_ACCOUNT_NAME', 'podcastscoref')
-storage_account_key = os.getenv('AZURE_STORAGE_ACCOUNT_KEY', 'mYdJ0JI2YBZKj56B1u33/xYwsN3LbpyM6jYum+PxClFSlPs2kqsHZFP+5R8RFE9yfOGBSk4E93mr+AStqo/S9w==')
+storage_account_name = os.getenv('AZURE_STORAGE_ACCOUNT_NAME', 'your_storage_account_name')
+storage_account_key = os.getenv('AZURE_STORAGE_ACCOUNT_KEY', 'your_storage_account_key')
 
 # Create the BlobServiceClient object
 blob_service_client = BlobServiceClient(account_url=f"https://{storage_account_name}.blob.core.windows.net", credential=storage_account_key)

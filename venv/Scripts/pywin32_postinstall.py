@@ -2,10 +2,10 @@
 #
 # copies PyWinTypesxx.dll and PythonCOMxx.dll into the system directory,
 # and creates a pth file
-import os
-import sys
 import glob
+import os
 import shutil
+import sys
 import sysconfig
 
 try:
@@ -141,7 +141,8 @@ except NameError:
 
 
 def CopyTo(desc, src, dest):
-    import win32api, win32con
+    import win32api
+    import win32con
 
     while 1:
         try:
@@ -177,7 +178,8 @@ def CopyTo(desc, src, dest):
 # our pywintypes_system32 directory.
 def LoadSystemModule(lib_dir, modname):
     # See if this is a debug build.
-    import importlib.util, importlib.machinery
+    import importlib.machinery
+    import importlib.util
 
     suffix = "_d" if "_d.pyd" in importlib.machinery.EXTENSION_SUFFIXES else ""
     filename = "%s%d%d%s.dll" % (
@@ -377,7 +379,8 @@ def fixup_dbi():
     # We used to have a dbi.pyd with our .pyd files, but now have a .py file.
     # If the user didn't uninstall, they will find the .pyd which will cause
     # problems - so handle that.
-    import win32api, win32con
+    import win32api
+    import win32con
 
     pyd_name = os.path.join(os.path.dirname(win32api.__file__), "dbi.pyd")
     pyd_d_name = os.path.join(os.path.dirname(win32api.__file__), "dbi_d.pyd")
@@ -579,6 +582,15 @@ def install(lib_dir):
         pass
     print("The pywin32 extensions were successfully installed.")
 
+    if is_bdist_wininst:
+        # Open a web page with info about the .exe installers being deprecated.
+        import webbrowser
+
+        try:
+            webbrowser.open("https://mhammond.github.io/pywin32_installers.html")
+        except webbrowser.Error:
+            print("Please visit https://mhammond.github.io/pywin32_installers.html")
+
 
 def uninstall(lib_dir):
     # First ensure our system modules are loaded from pywin32_system, so
@@ -684,7 +696,7 @@ def verify_destination(location):
     return location
 
 
-if __name__ == "__main__":
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -765,3 +777,7 @@ if __name__ == "__main__":
     if args.remove:
         if not is_bdist_wininst:
             uninstall(args.destination)
+
+
+if __name__ == "__main__":
+    main()
