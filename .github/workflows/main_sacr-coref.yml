@@ -86,7 +86,7 @@ jobs:
         with:
           app-name: 'sacr-coref'  # Ensure this matches your Azure Web App name
           slot-name: 'Production'  # Use the default slot or specify a slot name if needed
-        timeout-minutes: 60  # Increase timeout as necessary to avoid timeouts during deployment
+        timeout-minutes: 50  # Increase timeout as necessary to avoid timeouts during deployment
 
       # Optional Step: Show directory structure for debugging purposes
       - name: Show directory structure (for debugging)
