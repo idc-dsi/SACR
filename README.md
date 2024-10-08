@@ -17,22 +17,22 @@ The workflow is as follows:
 
 (1) Mark the referring expressions:
 
-![Mark the referring expressions](docs/screenshot02.png)
+![Mark the referring expressions](static/docs/screenshot02.png)
 
 
 (2) Build the coreference chains:
 
-![build the coreference chains](docs/screenshot03.png)
+![build the coreference chains](static/docs/screenshot02.png)
 
 
 (3) Add feature annotations:
 
-![add feature annotations](docs/screenshot04.png)
+![add feature annotations](static/docs/screenshot02.png)
 
 
 (4) Play and search:
 
-![play and search](docs/screenshot05.png)
+![play and search](static/docs/screenshot02.png)
 
 
 
